@@ -10,7 +10,7 @@ public class CombatManager : MonoBehaviour
     
     [Header("캐릭터")]
     public PlayerCharacter playerCharacter;
-    public EnemyCharacter enemyCharacter;
+    public AssistantManagerEnemy enemyCharacter;
     
     [Header("UI 텍스트")]
     public Text playerHpText;
@@ -23,18 +23,22 @@ public class CombatManager : MonoBehaviour
     
     void Start()
     {
-        // 자동으로 캐릭터들 찾기
         if (playerCharacter == null)
             playerCharacter = FindObjectOfType<PlayerCharacter>();
             
         if (enemyCharacter == null)
-            enemyCharacter = FindObjectOfType<EnemyCharacter>();
+            enemyCharacter = FindObjectOfType<AssistantManagerEnemy>();
             
         SetState(State.ItemSelect);
         
         Debug.Log("CombatManager 초기화 완료!");
         Debug.Log("PlayerCharacter: " + (playerCharacter != null ? playerCharacter.gameObject.name : "없음"));
-        Debug.Log("EnemyCharacter: " + (enemyCharacter != null ? enemyCharacter.gameObject.name : "없음"));
+        Debug.Log("AssistantManagerEnemy: " + (enemyCharacter != null ? enemyCharacter.gameObject.name : "없음"));
+        
+        if (enemyCharacter != null)
+        {
+            Debug.Log("현재 적: " + enemyCharacter.EnemyName + " (" + enemyCharacter.EnemyRank + ")");
+        }
     }
     
     void Update()
@@ -49,7 +53,6 @@ public class CombatManager : MonoBehaviour
                 ExecuteDefense();
         }
         
-        // R키로 전투 리셋
         if (Input.GetKeyDown(KeyCode.R))
         {
             ResetCombat();
@@ -78,26 +81,22 @@ public class CombatManager : MonoBehaviour
     {
         if (playerCharacter == null || enemyCharacter == null)
         {
-            Debug.LogError("PlayerCharacter 또는 EnemyCharacter가 없습니다!");
+            Debug.LogError("PlayerCharacter 또는 AssistantManagerEnemy가 없습니다!");
             return;
         }
         
-        // 플레이어의 공격 데미지 계산
         float playerDamage = playerCharacter.CalculateAttackDamage();
         
-        // 선택된 아이템 보너스 적용
         if (selectedItem != null)
             playerDamage *= selectedItem.DamageCoefficient;
             
-        // 적에게 데미지 적용
         enemyCharacter.TakeDamage(playerDamage);
-        Debug.Log("플레이어 공격! 데미지: " + playerDamage);
+        Debug.Log("플레이어 공격! " + enemyCharacter.EnemyName + "에게 데미지: " + playerDamage);
         
-        // 적 사망 체크
         if (enemyCharacter.HP <= 0)
         {
-            Debug.Log("적 사망! 승리!");
-            SetState(State.ItemSelect); // 승리 후 아이템 선택으로 돌아감
+            Debug.Log(enemyCharacter.EnemyName + " 사망! 승리!");
+            SetState(State.ItemSelect);
         }
         else
         {
@@ -109,22 +108,19 @@ public class CombatManager : MonoBehaviour
     {
         if (playerCharacter == null || enemyCharacter == null)
         {
-            Debug.LogError("PlayerCharacter 또는 EnemyCharacter가 없습니다!");
+            Debug.LogError("PlayerCharacter 또는 AssistantManagerEnemy가 없습니다!");
             return;
         }
         
-        // 적의 공격 데미지 계산
         float enemyDamage = enemyCharacter.CalculateAttackDamage();
         
-        // 플레이어에게 데미지 적용
         playerCharacter.TakeDamage(enemyDamage);
-        Debug.Log("적 공격! 받은 데미지: " + enemyDamage);
+        Debug.Log(enemyCharacter.EnemyName + " 공격! 받은 데미지: " + enemyDamage);
         
-        // 플레이어 사망 체크
         if (playerCharacter.HP <= 0)
         {
             Debug.Log("플레이어 사망! 패배!");
-            SetState(State.ItemSelect); // 패배 후 아이템 선택으로 돌아감
+            SetState(State.ItemSelect);
         }
         else
         {
@@ -138,10 +134,10 @@ public class CombatManager : MonoBehaviour
             playerHpText.text = "Player HP: " + playerCharacter.HP.ToString("F0") + "/" + playerCharacter.MaxHP.ToString("F0");
             
         if (enemyHpText && enemyCharacter)
-            enemyHpText.text = "Enemy HP: " + enemyCharacter.HP.ToString("F0") + "/" + enemyCharacter.MaxHP.ToString("F0");
+            enemyHpText.text = enemyCharacter.EnemyName + " HP: " + enemyCharacter.HP.ToString("F0") + "/" + enemyCharacter.MaxHP.ToString("F0");
             
         if (stageText)
-            stageText.text = "상태: " + GetStateDisplayText();
+            stageText.text = "상태: " + GetStateDisplayText() + " | 적: " + (enemyCharacter != null ? enemyCharacter.EnemyRank : "없음");
     }
     
     string GetStateDisplayText()
@@ -170,6 +166,6 @@ public class CombatManager : MonoBehaviour
         
         selectedItem = null;
         SetState(State.ItemSelect);
-        Debug.Log("전투 리셋!");
+        Debug.Log("전투 리셋! " + (enemyCharacter != null ? enemyCharacter.EnemyName : "대리") + "와의 전투 재시작");
     }
 }

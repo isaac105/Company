@@ -3,14 +3,18 @@ using UnityEngine;
 public class EnemyCharacter : MonoBehaviour
 {
     [Header("적 기본 속성")]
-    [SerializeField] private float hp;
-    [SerializeField] private float damage = 15f;
-    [SerializeField] private float attackCoefficient;
-    [SerializeField] private float defenseCoefficient;
-    [SerializeField] private Item currentItem;
+    [SerializeField] protected float hp;
+    [SerializeField] protected float damage = 15f;
+    [SerializeField] protected float attackCoefficient;
+    [SerializeField] protected float defenseCoefficient;
+    [SerializeField] protected Item currentItem;
 
     [Header("최대 HP 설정")]
-    [SerializeField] private float maxHp;
+    [SerializeField] protected float maxHp;
+
+    [Header("적 정보")]
+    [SerializeField] protected string enemyName = "적";
+    [SerializeField] protected string enemyRank = "Unknown";
 
     [Header("디버그 정보")]
     [SerializeField] private string currentItemDebugInfo = "None";
@@ -33,6 +37,18 @@ public class EnemyCharacter : MonoBehaviour
         set { maxHp = value; } 
     }
     
+    public string EnemyName
+    {
+        get { return enemyName; }
+        set { enemyName = value; }
+    }
+    
+    public string EnemyRank
+    {
+        get { return enemyRank; }
+        set { enemyRank = value; }
+    }
+    
     public Item CurrentItem 
     { 
         get { return currentItem; } 
@@ -48,7 +64,7 @@ public class EnemyCharacter : MonoBehaviour
                 currentItemDebugInfo = "None";
             }
             
-            Debug.Log("적 CurrentItem 프로퍼티 설정됨: " + (value != null ? value.GetItemInfo() : "null"));
+            Debug.Log(enemyName + " CurrentItem 프로퍼티 설정됨: " + (value != null ? value.GetItemInfo() : "null"));
         } 
     }
     
@@ -64,22 +80,27 @@ public class EnemyCharacter : MonoBehaviour
         set { defenseCoefficient = value; } 
     }
     
-    void Start()
+    protected virtual void Start()
+    {
+        InitializeEnemy();
+    }
+    
+    protected virtual void InitializeEnemy()
     {
         if (maxHp <= 0) maxHp = 100f;
         if (hp <= 0) hp = maxHp;
         if (attackCoefficient <= 0) attackCoefficient = 1.0f;
         if (defenseCoefficient <= 0) defenseCoefficient = 1.0f;
         
-        Debug.Log("적 캐릭터 초기화 완료: HP " + hp + "/" + maxHp);
+        Debug.Log(enemyName + " (" + enemyRank + ") 초기화 완료: HP " + hp + "/" + maxHp);
     }
     
-    public void TakeDamage(float damage)
+    public virtual void TakeDamage(float damage)
     {
         float finalDamage = damage / defenseCoefficient;
         HP -= finalDamage;
         
-        Debug.Log("적이 데미지 받음: " + finalDamage + " - 현재 HP: " + HP + "/" + maxHp);
+        Debug.Log(enemyName + "이 데미지 받음: " + finalDamage + " - 현재 HP: " + HP + "/" + maxHp);
         
         if (HP <= 0)
         {
@@ -87,55 +108,60 @@ public class EnemyCharacter : MonoBehaviour
         }
     }
     
-    public float CalculateAttackDamage()
+    public virtual float CalculateAttackDamage()
     {
         float itemDamageBonus = currentItem != null ? currentItem.DamageCoefficient : 1.0f;
         float finalDamage = damage * attackCoefficient * itemDamageBonus;
         
-        Debug.Log("적 공격 데미지 계산: " + finalDamage);
+        Debug.Log(enemyName + " 공격 데미지 계산: " + finalDamage);
         return finalDamage;
     }
     
-    public void EquipItem(Item newItem)
+    public virtual void EquipItem(Item newItem)
     {
-        Debug.Log("적이 아이템 장착. 새 아이템: " + (newItem != null ? newItem.GetItemInfo() : "null"));
+        Debug.Log(enemyName + "이 아이템 장착. 새 아이템: " + (newItem != null ? newItem.GetItemInfo() : "null"));
         
         currentItem = newItem;
         
         if (currentItem != null)
         {
             currentItemDebugInfo = currentItem.gameObject.name + " (데미지: " + currentItem.DamageCoefficient + ")";
-            Debug.Log("적 아이템 장착 완료: " + currentItem.GetItemInfo());
+            Debug.Log(enemyName + " 아이템 장착 완료: " + currentItem.GetItemInfo());
         }
         else
         {
             currentItemDebugInfo = "None";
-            Debug.Log("적 아이템 장착: None");
+            Debug.Log(enemyName + " 아이템 장착: None");
         }
         
         ShowEnemyStatus();
     }
     
-    public void Heal(float healAmount)
+    public virtual void Heal(float healAmount)
     {
         HP += healAmount;
-        Debug.Log("적 HP 회복: " + healAmount + " - 현재 HP: " + HP + "/" + maxHp);
+        Debug.Log(enemyName + " HP 회복: " + healAmount + " - 현재 HP: " + HP + "/" + maxHp);
     }
     
-    private void OnEnemyDeath()
+    protected virtual void OnEnemyDeath()
     {
-        Debug.Log("적이 사망했습니다!");
+        Debug.Log(enemyName + " (" + enemyRank + ")이 사망했습니다!");
+        OnEnemyDefeated();
     }
     
-    public void ShowEnemyStatus()
+    protected virtual void OnEnemyDefeated()
     {
-        Debug.Log("=== 적 상태 ===");
+        // 각 적별 고유한 사망 처리 (자식 클래스에서 오버라이드)
+    }
+    
+    public virtual void ShowEnemyStatus()
+    {
+        Debug.Log("=== " + enemyName + " (" + enemyRank + ") 상태 ===");
         Debug.Log("HP: " + HP + "/" + maxHp);
         Debug.Log("공격 계수: " + attackCoefficient);
         Debug.Log("방어 계수: " + defenseCoefficient);
         Debug.Log("현재 아이템: " + (currentItem != null ? currentItem.GetItemInfo() : "None"));
-        Debug.Log("디버그 정보: " + currentItemDebugInfo);
-        Debug.Log("=================");
+        Debug.Log("===========================");
     }
     
     private void OnMouseDown()
@@ -145,14 +171,11 @@ public class EnemyCharacter : MonoBehaviour
     
     private void Update()
     {
-        // E키로 적 상태 확인
         if (Input.GetKeyDown(KeyCode.E))
         {
-            Debug.Log("[E키] 적 currentItem 상태: " + (currentItem != null ? currentItem.GetItemInfo() : "None"));
-            Debug.Log("[E키] 적 디버그 정보: " + currentItemDebugInfo);
+            Debug.Log("[E키] " + enemyName + " currentItem 상태: " + (currentItem != null ? currentItem.GetItemInfo() : "None"));
         }
         
-        // currentItem과 currentItemDebugInfo 동기화
         if (currentItem != null && currentItemDebugInfo == "None")
         {
             currentItemDebugInfo = currentItem.gameObject.name + " (데미지: " + currentItem.DamageCoefficient + ")";
