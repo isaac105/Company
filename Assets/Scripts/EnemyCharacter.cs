@@ -126,7 +126,6 @@ public class EnemyCharacter : MonoBehaviour
         if (isDefenseBlocked)
         {
             Debug.Log(enemyName + "의 방어가 봉인되어 있습니다!");
-            isDefenseBlocked = false;
             return false;
         }
         
@@ -145,8 +144,6 @@ public class EnemyCharacter : MonoBehaviour
         {
             Debug.Log(enemyName + "의 방어 실패 (확률: " + (finalDefenseChance * 100).ToString("F1") + "%)");
         }
-        
-        defenseReduction = 0f;
         
         return defended;
     }
@@ -265,5 +262,20 @@ public class EnemyCharacter : MonoBehaviour
         
         Debug.Log(enemyName + " 공격 데미지 계산: " + finalDamage);
         return finalDamage;
+    }
+
+    public virtual void EndTurn()
+    {
+        if (isDefenseBlocked)
+        {
+            isDefenseBlocked = false;
+            Debug.Log(enemyName + "의 방어 봉인이 해제되었습니다.");
+        }
+        
+        if (defenseReduction > 0)
+        {
+            defenseReduction = 0f;
+            Debug.Log(enemyName + "의 방어력 감소 효과가 해제되었습니다.");
+        }
     }
 }

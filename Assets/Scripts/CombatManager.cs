@@ -91,12 +91,80 @@ public class CombatManager : MonoBehaviour
         {
             playerDamage *= selectedItem.DamageCoefficient;
             
-            // 아이템의 특수 효과 적용
+            // 연속공격 효과 확인
+            if (selectedItem.HasEffect(ItemEffectType.DoubleAttack))
+            {
+                int attackCount = (int)selectedItem.GetEffectValue(ItemEffectType.DoubleAttack);
+                ExecuteMultipleAttacks(playerDamage, attackCount);
+                return;
+            }
+            
+            // 다른 특수 효과 적용
             selectedItem.ApplyItemEffects(playerCharacter, enemyCharacter, this);
         }
             
         enemyCharacter.TakeDamage(playerDamage);
         Debug.Log("플레이어 공격! " + enemyCharacter.EnemyName + "에게 데미지: " + playerDamage);
+        
+        // 플레이어 턴 종료 - 적의 일회성 효과 리셋
+        enemyCharacter.EndTurn();
+        
+        if (enemyCharacter.HP <= 0)
+        {
+            Debug.Log(enemyCharacter.EnemyName + " 사망! 승리!");
+            SetState(State.ItemSelect);
+        }
+        else
+        {
+            SetState(State.DefenseTiming);
+        }
+    }
+    
+    // 연속공격 처리 메서드
+    void ExecuteMultipleAttacks(float baseDamage, int attackCount)
+    {
+        Debug.Log("=== 연속공격 시작! 총 " + attackCount + "회 공격 ===");
+        
+        // 다른 특수 효과들 먼저 적용 (방어 봉인 등)
+        if (selectedItem != null)
+        {
+            selectedItem.ApplyItemEffects(playerCharacter, enemyCharacter, this);
+        }
+        
+        int successfulAttacks = 0;
+        float totalDamage = 0f;
+        
+        for (int i = 0; i < attackCount; i++)
+        {
+            Debug.Log("--- 공격 " + (i + 1) + "/" + attackCount + " ---");
+            
+            // 각 공격마다 적이 개별적으로 방어 시도
+            if (enemyCharacter.TryDefense())
+            {
+                Debug.Log(enemyCharacter.EnemyName + "이 " + (i + 1) + "번째 공격을 방어했습니다! (데미지: 0)");
+            }
+            else
+            {
+                float finalDamage = baseDamage / enemyCharacter.DefenseCoefficient;
+                enemyCharacter.HP -= finalDamage;
+                totalDamage += finalDamage;
+                successfulAttacks++;
+                
+                Debug.Log(enemyCharacter.EnemyName + "이 " + (i + 1) + "번째 공격으로 데미지: " + finalDamage + " - 현재 HP: " + enemyCharacter.HP + "/" + enemyCharacter.MaxHP);
+            }
+            
+            // 적이 사망했으면 연속공격 중단
+            if (enemyCharacter.HP <= 0)
+            {
+                Debug.Log(enemyCharacter.EnemyName + " 사망! " + (i + 1) + "번째 공격에서 쓰러졌습니다!");
+                break;
+            }
+        }
+        
+        Debug.Log("=== 연속공격 완료! 성공한 공격: " + successfulAttacks + "/" + attackCount + ", 총 데미지: " + totalDamage + " ===");
+        
+        // 플레이어 턴 종료 - 적의 일회성 효과 리셋
+        enemyCharacter.EndTurn();
         
         if (enemyCharacter.HP <= 0)
         {

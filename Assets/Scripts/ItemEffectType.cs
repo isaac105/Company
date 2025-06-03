@@ -41,7 +41,7 @@ public static class ItemEffectProcessor
                 
             case ItemEffectType.DoubleAttack:
                 Debug.Log("연속 공격을 실행합니다! (공격 횟수: " + effectValue + ")");
-                // TODO: 연속 공격 로직 구현
+                // 연속공격은 CombatManager에서 직접 처리됨
                 break;
                 
             case ItemEffectType.ReduceEnemyDefense:
