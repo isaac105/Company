@@ -3,22 +3,17 @@ using UnityEngine.UI;
 
 public class HotCoffee : Item
 {
-    [Header("뜨거운 커피잔 속성")]
-    [SerializeField] private float coffeeDamageCoefficient = 1.0f;
-    [SerializeField] private bool blockNextDefense = true;
-    
     private Button coffeeButton;
     private CombatManager combatManager;
     
-    public bool BlockNextDefense 
-    { 
-        get { return blockNextDefense; } 
-        set { blockNextDefense = value; }
-    }
-    
     protected override void Start()
     {
-        DamageCoefficient = coffeeDamageCoefficient;
+        // 기본 속성 설정
+        itemName = "뜨거운 커피잔";
+        damageCoefficient = 1.0f;
+        
+        // 특수 효과 추가
+        AddEffect(ItemEffectType.BlockNextDefense, 1f, "방어 봉인");
         
         // CombatManager 찾기
         combatManager = FindObjectOfType<CombatManager>();
@@ -35,7 +30,7 @@ public class HotCoffee : Item
             Debug.LogWarning("HotCoffee에 Button 컴포넌트가 없습니다!");
         }
         
-        Debug.Log("뜨거운 커피잔 초기화 완료: 데미지 계수 " + DamageCoefficient);
+        Debug.Log("뜨거운 커피잔 초기화 완료: " + GetItemInfo());
     }
     
     public void OnHotCoffeeClick()
@@ -59,11 +54,6 @@ public class HotCoffee : Item
         {
             player.EquipItem(this);
         }
-    }
-    
-    public override string GetItemInfo()
-    {
-        return "뜨거운 커피잔 - 데미지 계수: " + DamageCoefficient + " (방어 봉인)";
     }
     
     public override void UseItem()

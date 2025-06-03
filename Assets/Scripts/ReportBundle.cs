@@ -3,15 +3,16 @@ using UnityEngine.UI;
 
 public class ReportBundle : Item
 {
-    [Header("리포트 번들 속성")]
-    [SerializeField] private float reportBundleDamageCoefficient = 1.5f;
-    
     private Button reportBundleButton;
     private CombatManager combatManager;
     
     protected override void Start()
     {
-        DamageCoefficient = reportBundleDamageCoefficient;
+        // 기본 속성 설정
+        itemName = "얇은 보고서 뭉치";
+        damageCoefficient = 1.5f;
+        
+        // 기본 제공 아이템이므로 특수 효과 없음
         
         // CombatManager 찾기
         combatManager = FindObjectOfType<CombatManager>();
@@ -28,7 +29,7 @@ public class ReportBundle : Item
             Debug.LogWarning("ReportBundle에 Button 컴포넌트가 없습니다!");
         }
         
-        Debug.Log("리포트 번들 초기화 완료: 데미지 계수 " + DamageCoefficient);
+        Debug.Log("리포트 번들 초기화 완료: " + GetItemInfo());
     }
     
     public void OnReportBundleClick()
@@ -54,14 +55,9 @@ public class ReportBundle : Item
         }
     }
     
-    public override string GetItemInfo()
-    {
-        return "리포트 번들 - 데미지 계수: " + DamageCoefficient;
-    }
-    
     public override void UseItem()
     {
-        Debug.Log("리포트 번들 사용! 데미지 계수: " + DamageCoefficient);
+        Debug.Log("리포트 번들 사용! 기본 데미지를 줍니다.");
     }
     
     private void OnDestroy()

@@ -3,29 +3,17 @@ using UnityEngine.UI;
 
 public class LargeUSB : Item
 {
-    [Header("대용량 USB 속성")]
-    [SerializeField] private float usbDamageCoefficient = 1.2f;
-    [SerializeField] private bool veryHardDefense = true;
-    [SerializeField] private float defenseReduction = 0.3f;
-    
     private Button usbButton;
     private CombatManager combatManager;
     
-    public bool VeryHardDefense 
-    { 
-        get { return veryHardDefense; } 
-        set { veryHardDefense = value; }
-    }
-    
-    public float DefenseReduction 
-    { 
-        get { return defenseReduction; } 
-        set { defenseReduction = value; }
-    }
-    
     protected override void Start()
     {
-        DamageCoefficient = usbDamageCoefficient;
+        // 기본 속성 설정
+        itemName = "대용량 USB";
+        damageCoefficient = 1.2f;
+        
+        // 특수 효과 추가
+        AddEffect(ItemEffectType.ReduceEnemyDefense, 0.3f, "방어력 30% 감소");
         
         // CombatManager 찾기
         combatManager = FindObjectOfType<CombatManager>();
@@ -42,7 +30,7 @@ public class LargeUSB : Item
             Debug.LogWarning("LargeUSB에 Button 컴포넌트가 없습니다!");
         }
         
-        Debug.Log("대용량 USB 초기화 완료: 데미지 계수 " + DamageCoefficient);
+        Debug.Log("대용량 USB 초기화 완료: " + GetItemInfo());
     }
     
     public void OnLargeUSBClick()
@@ -66,11 +54,6 @@ public class LargeUSB : Item
         {
             player.EquipItem(this);
         }
-    }
-    
-    public override string GetItemInfo()
-    {
-        return "대용량 USB - 데미지 계수: " + DamageCoefficient + " (방어 어려움)";
     }
     
     public override void UseItem()

@@ -3,36 +3,18 @@ using UnityEngine.UI;
 
 public class ApprovalDocuments : Item
 {
-    [Header("결재 서류철 속성")]
-    [SerializeField] private float documentsDamageCoefficient = 3.0f;
-    [SerializeField] private bool veryHardDefense = true;
-    [SerializeField] private float defenseReduction = 0.2f;
-    [SerializeField] private bool highDamage = true;
-    
     private Button documentsButton;
     private CombatManager combatManager;
     
-    public bool VeryHardDefense 
-    { 
-        get { return veryHardDefense; } 
-        set { veryHardDefense = value; }
-    }
-    
-    public float DefenseReduction 
-    { 
-        get { return defenseReduction; } 
-        set { defenseReduction = value; }
-    }
-    
-    public bool HighDamage 
-    { 
-        get { return highDamage; } 
-        set { highDamage = value; }
-    }
-    
     protected override void Start()
     {
-        DamageCoefficient = documentsDamageCoefficient;
+        // 기본 속성 설정
+        itemName = "결재 서류철 (미결재)";
+        damageCoefficient = 3.0f;
+        
+        // 특수 효과 추가
+        AddEffect(ItemEffectType.HighDamage, 3.0f, "고데미지");
+        AddEffect(ItemEffectType.ReduceEnemyDefense, 0.2f, "방어력 20% 감소");
         
         // CombatManager 찾기
         combatManager = FindObjectOfType<CombatManager>();
@@ -49,7 +31,7 @@ public class ApprovalDocuments : Item
             Debug.LogWarning("ApprovalDocuments에 Button 컴포넌트가 없습니다!");
         }
         
-        Debug.Log("결재 서류철 초기화 완료: 데미지 계수 " + DamageCoefficient);
+        Debug.Log("결재 서류철 초기화 완료: " + GetItemInfo());
     }
     
     public void OnApprovalDocumentsClick()
@@ -73,11 +55,6 @@ public class ApprovalDocuments : Item
         {
             player.EquipItem(this);
         }
-    }
-    
-    public override string GetItemInfo()
-    {
-        return "결재 서류철 (미결재) - 데미지 계수: " + DamageCoefficient + " (최강 무기)";
     }
     
     public override void UseItem()

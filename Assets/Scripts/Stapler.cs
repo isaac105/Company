@@ -3,29 +3,17 @@ using UnityEngine.UI;
 
 public class Stapler : Item
 {
-    [Header("스테이플러 속성")]
-    [SerializeField] private float staplerDamageCoefficient = 1.0f;
-    [SerializeField] private bool doubleAttack = true;
-    [SerializeField] private int attackCount = 2;
-    
     private Button staplerButton;
     private CombatManager combatManager;
     
-    public bool DoubleAttack 
-    { 
-        get { return doubleAttack; } 
-        set { doubleAttack = value; }
-    }
-    
-    public int AttackCount 
-    { 
-        get { return attackCount; } 
-        set { attackCount = value; }
-    }
-    
     protected override void Start()
     {
-        DamageCoefficient = staplerDamageCoefficient;
+        // 기본 속성 설정
+        itemName = "스테이플러";
+        damageCoefficient = 1.0f;
+        
+        // 특수 효과 추가
+        AddEffect(ItemEffectType.DoubleAttack, 2f, "2회 공격");
         
         // CombatManager 찾기
         combatManager = FindObjectOfType<CombatManager>();
@@ -42,7 +30,7 @@ public class Stapler : Item
             Debug.LogWarning("Stapler에 Button 컴포넌트가 없습니다!");
         }
         
-        Debug.Log("스테이플러 초기화 완료: 데미지 계수 " + DamageCoefficient);
+        Debug.Log("스테이플러 초기화 완료: " + GetItemInfo());
     }
     
     public void OnStaplerClick()
@@ -68,14 +56,9 @@ public class Stapler : Item
         }
     }
     
-    public override string GetItemInfo()
-    {
-        return "스테이플러 - 데미지 계수: " + DamageCoefficient + " (" + attackCount + "회 공격)";
-    }
-    
     public override void UseItem()
     {
-        Debug.Log("스테이플러 사용! " + attackCount + "번 연속 공격!");
+        Debug.Log("스테이플러 사용! 2번 연속 공격!");
     }
     
     private void OnDestroy()
