@@ -4,21 +4,27 @@ public class PlayerCharacter : MonoBehaviour
 {
     [Header("플레이어 기본 속성")]
     [SerializeField] private float hp;
-    [SerializeField] private float baseDamage;
+    [SerializeField] private float damage = 10f;
     [SerializeField] private float attackCoefficient;
     [SerializeField] private float defenseCoefficient;
     [SerializeField] private Item currentItem;
 
     [Header("최대 HP 설정")]
     [SerializeField] private float maxHp;
-    
+
     [Header("디버그 정보")]
     [SerializeField] private string currentItemDebugInfo = "None";
-    
-    public float HP 
-    { 
-        get { return hp; } 
-        set { hp = Mathf.Clamp(value, 0f, maxHp); } 
+
+    public float HP
+    {
+        get { return hp; }
+        set { hp = Mathf.Clamp(value, 0f, maxHp); }
+    }
+
+    public float Damage
+    {
+        get { return damage; }
+        set { damage = value; }
     }
     
     public float MaxHP 
@@ -84,7 +90,7 @@ public class PlayerCharacter : MonoBehaviour
     public float CalculateAttackDamage()
     {
         float itemDamageBonus = currentItem != null ? currentItem.DamageCoefficient : 1.0f;
-        float finalDamage = baseDamage * attackCoefficient * itemDamageBonus;
+        float finalDamage = damage * attackCoefficient * itemDamageBonus;
         
         Debug.Log("공격 데미지 계산: " + finalDamage);
         return finalDamage;

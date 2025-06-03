@@ -6,80 +6,51 @@ public class ReportBundle : Item
     [Header("리포트 번들 속성")]
     [SerializeField] private float reportBundleDamageCoefficient = 1.5f;
     
-    [Header("테스트용")]
-    [SerializeField] private PlayerCharacter targetPlayer; // Inspector에서 직접 설정용
-    
     private Button reportBundleButton;
+    private CombatManager combatManager;
     
     protected override void Start()
     {
         DamageCoefficient = reportBundleDamageCoefficient;
         
-        // 타겟 플레이어를 자동으로 찾기
-        if (targetPlayer == null)
-        {
-            targetPlayer = FindObjectOfType<PlayerCharacter>();
-        }
+        // CombatManager 찾기
+        combatManager = FindObjectOfType<CombatManager>();
         
         reportBundleButton = GetComponent<Button>();
         
         if (reportBundleButton != null)
         {
             reportBundleButton.onClick.AddListener(OnReportBundleClick);
-            Debug.Log("버튼 이벤트 등록 완료");
+            Debug.Log("리포트 번들 버튼 이벤트 등록 완료");
         }
         else
         {
-            Debug.LogWarning("Button 컴포넌트가 없습니다!");
+            Debug.LogWarning("ReportBundle에 Button 컴포넌트가 없습니다!");
         }
         
-        Debug.Log("ReportBundle 초기화 완료. 타겟 플레이어: " + (targetPlayer != null ? targetPlayer.gameObject.name : "없음"));
+        Debug.Log("리포트 번들 초기화 완료: 데미지 계수 " + DamageCoefficient);
     }
     
     public void OnReportBundleClick()
     {
-        Debug.Log("=== 리포트 번들 클릭 시작 ===");
+        Debug.Log("리포트 번들 클릭됨!");
         
-        if (targetPlayer == null)
+        if (combatManager != null)
         {
-            Debug.LogError("타겟 플레이어가 없습니다!");
-            targetPlayer = FindObjectOfType<PlayerCharacter>();
-            Debug.Log("다시 찾은 플레이어: " + (targetPlayer != null ? targetPlayer.gameObject.name : "없음"));
-        }
-        
-        if (targetPlayer != null)
-        {
-            Debug.Log("플레이어 찾음: " + targetPlayer.gameObject.name);
-            
-            // EquipItem 메서드도 호출
-            targetPlayer.EquipItem(this);
-            Debug.Log("EquipItem 메서드 호출 완료!");
-            
-            // 즉시 확인
-            if (targetPlayer.CurrentItem != null)
-            {
-                Debug.Log("설정 성공! 현재 아이템: " + targetPlayer.CurrentItem.gameObject.name);
-            }
-            else
-            {
-                Debug.LogError("설정 실패! currentItem이 여전히 null입니다!");
-            }
+            // CombatManager에 아이템 선택 알림
+            combatManager.OnItemSelected(this);
+            Debug.Log("CombatManager에 아이템 선택 전달: " + GetItemInfo());
         }
         else
         {
-            Debug.LogError("PlayerCharacter를 찾을 수 없습니다!");
+            Debug.LogError("CombatManager를 찾을 수 없습니다!");
         }
         
-        Debug.Log("=== 리포트 번들 클릭 종료 ===");
-    }
-    
-    // 수동 테스트용 메서드 (키보드로 호출)
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.T))
+        // PlayerCharacter에도 장착
+        PlayerCharacter player = FindObjectOfType<PlayerCharacter>();
+        if (player != null)
         {
-            Debug.Log("[T키] 수동 테스트 시작");
-            OnReportBundleClick();
+            player.EquipItem(this);
         }
     }
     
