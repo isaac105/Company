@@ -11,6 +11,7 @@ public class AssistantManagerEnemy : EnemyCharacter
         damage = 12f;
         attackCoefficient = 1.0f;
         defenseCoefficient = 1.0f;
+        baseDefenseChance = 0.25f; // 대리: 25% 방어 확률 (낮음)
         
         base.InitializeEnemy();
         

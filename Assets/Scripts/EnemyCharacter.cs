@@ -15,9 +15,15 @@ public class EnemyCharacter : MonoBehaviour
     [Header("적 정보")]
     [SerializeField] protected string enemyName = "적";
     [SerializeField] protected string enemyRank = "Unknown";
+    
+    [Header("방어 시스템")]
+    [SerializeField] protected float baseDefenseChance = 0.3f; // 기본 30% 방어 확률
+    [SerializeField] protected bool isDefenseBlocked = false; // 방어 봉인 상태
+    [SerializeField] protected float defenseReduction = 0f; // 방어 확률 감소량
 
     [Header("디버그 정보")]
     [SerializeField] private string currentItemDebugInfo = "None";
+    [SerializeField] private bool lastActionWasDefense = false;
 
     public float HP
     {
@@ -47,6 +53,23 @@ public class EnemyCharacter : MonoBehaviour
     {
         get { return enemyRank; }
         set { enemyRank = value; }
+    }
+    
+    public float BaseDefenseChance
+    {
+        get { return baseDefenseChance; }
+        set { baseDefenseChance = Mathf.Clamp01(value); }
+    }
+    
+    public bool IsDefenseBlocked
+    {
+        get { return isDefenseBlocked; }
+        set { isDefenseBlocked = value; }
+    }
+    
+    public bool LastActionWasDefense
+    {
+        get { return lastActionWasDefense; }
     }
     
     public Item CurrentItem 
@@ -91,12 +114,53 @@ public class EnemyCharacter : MonoBehaviour
         if (hp <= 0) hp = maxHp;
         if (attackCoefficient <= 0) attackCoefficient = 1.0f;
         if (defenseCoefficient <= 0) defenseCoefficient = 1.0f;
+        if (baseDefenseChance <= 0) baseDefenseChance = 0.3f; // 기본 30%
         
-        Debug.Log(enemyName + " (" + enemyRank + ") 초기화 완료: HP " + hp + "/" + maxHp);
+        Debug.Log(enemyName + " (" + enemyRank + ") 초기화 완료: HP " + hp + "/" + maxHp + ", 방어 확률: " + (baseDefenseChance * 100) + "%");
+    }
+    
+    public virtual bool TryDefense()
+    {
+        lastActionWasDefense = false;
+        
+        if (isDefenseBlocked)
+        {
+            Debug.Log(enemyName + "의 방어가 봉인되어 있습니다!");
+            isDefenseBlocked = false;
+            return false;
+        }
+        
+        float finalDefenseChance = baseDefenseChance * (1f - defenseReduction);
+        finalDefenseChance = Mathf.Clamp01(finalDefenseChance);
+        
+        float roll = Random.Range(0f, 1f);
+        bool defended = roll < finalDefenseChance;
+        
+        if (defended)
+        {
+            lastActionWasDefense = true;
+            Debug.Log(enemyName + "이 방어에 성공했습니다! (확률: " + (finalDefenseChance * 100).ToString("F1") + "%)");
+        }
+        else
+        {
+            Debug.Log(enemyName + "의 방어 실패 (확률: " + (finalDefenseChance * 100).ToString("F1") + "%)");
+        }
+        
+        defenseReduction = 0f;
+        
+        return defended;
     }
     
     public virtual void TakeDamage(float damage)
     {
+        // 방어 시도
+        if (TryDefense())
+        {
+            Debug.Log(enemyName + "이 공격을 완전히 방어했습니다! (데미지: 0)");
+            return;
+        }
+        
+        // 방어 실패 시 데미지 계산
         float finalDamage = damage / defenseCoefficient;
         HP -= finalDamage;
         
@@ -108,13 +172,18 @@ public class EnemyCharacter : MonoBehaviour
         }
     }
     
-    public virtual float CalculateAttackDamage()
+    // 아이템 효과로 방어 봉인
+    public virtual void BlockNextDefense()
     {
-        float itemDamageBonus = currentItem != null ? currentItem.DamageCoefficient : 1.0f;
-        float finalDamage = damage * attackCoefficient * itemDamageBonus;
-        
-        Debug.Log(enemyName + " 공격 데미지 계산: " + finalDamage);
-        return finalDamage;
+        isDefenseBlocked = true;
+        Debug.Log(enemyName + "의 다음 방어가 봉인되었습니다!");
+    }
+    
+    // 아이템 효과로 방어력 감소
+    public virtual void ReduceDefenseChance(float reductionAmount)
+    {
+        defenseReduction = Mathf.Clamp01(reductionAmount);
+        Debug.Log(enemyName + "의 방어 확률이 " + (reductionAmount * 100) + "% 감소됩니다!");
     }
     
     public virtual void EquipItem(Item newItem)
@@ -160,6 +229,9 @@ public class EnemyCharacter : MonoBehaviour
         Debug.Log("HP: " + HP + "/" + maxHp);
         Debug.Log("공격 계수: " + attackCoefficient);
         Debug.Log("방어 계수: " + defenseCoefficient);
+        Debug.Log("방어 확률: " + (baseDefenseChance * 100) + "%");
+        Debug.Log("방어 봉인: " + (isDefenseBlocked ? "예" : "아니오"));
+        Debug.Log("방어력 감소: " + (defenseReduction * 100) + "%");
         Debug.Log("현재 아이템: " + (currentItem != null ? currentItem.GetItemInfo() : "None"));
         Debug.Log("===========================");
     }
@@ -184,5 +256,14 @@ public class EnemyCharacter : MonoBehaviour
         {
             currentItemDebugInfo = "None";
         }
+    }
+
+    public virtual float CalculateAttackDamage()
+    {
+        float itemDamageBonus = currentItem != null ? currentItem.DamageCoefficient : 1.0f;
+        float finalDamage = damage * attackCoefficient * itemDamageBonus;
+        
+        Debug.Log(enemyName + " 공격 데미지 계산: " + finalDamage);
+        return finalDamage;
     }
 }

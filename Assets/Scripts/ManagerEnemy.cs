@@ -11,6 +11,7 @@ public class ManagerEnemy : EnemyCharacter
         damage = 18f;
         attackCoefficient = 1.2f;
         defenseCoefficient = 1.1f;
+        baseDefenseChance = 0.35f; // 과장: 35% 방어 확률 (보통)
         
         base.InitializeEnemy();
         

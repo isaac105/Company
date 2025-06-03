@@ -14,7 +14,7 @@ public class ApprovalDocuments : Item
         
         // 특수 효과 추가
         AddEffect(ItemEffectType.HighDamage, 3.0f, "고데미지");
-        AddEffect(ItemEffectType.ReduceEnemyDefense, 0.2f, "방어력 20% 감소");
+        AddEffect(ItemEffectType.ReduceEnemyDefense, 0.3f, "방어 확률 30% 감소");
         
         // CombatManager 찾기
         combatManager = FindObjectOfType<CombatManager>();

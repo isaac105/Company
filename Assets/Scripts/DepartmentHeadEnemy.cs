@@ -11,6 +11,7 @@ public class DepartmentHeadEnemy : EnemyCharacter
         damage = 25f;
         attackCoefficient = 1.5f;
         defenseCoefficient = 1.3f;
+        baseDefenseChance = 0.45f; // 부장: 45% 방어 확률 (높음)
         
         base.InitializeEnemy();
         

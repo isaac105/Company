@@ -11,6 +11,7 @@ public class DirectorEnemy : EnemyCharacter
         damage = 35f;
         attackCoefficient = 1.8f;
         defenseCoefficient = 1.5f;
+        baseDefenseChance = 0.55f; // 이사: 55% 방어 확률 (매우 높음)
         
         base.InitializeEnemy();
         

@@ -88,7 +88,12 @@ public class CombatManager : MonoBehaviour
         float playerDamage = playerCharacter.CalculateAttackDamage();
         
         if (selectedItem != null)
+        {
             playerDamage *= selectedItem.DamageCoefficient;
+            
+            // 아이템의 특수 효과 적용
+            selectedItem.ApplyItemEffects(playerCharacter, enemyCharacter, this);
+        }
             
         enemyCharacter.TakeDamage(playerDamage);
         Debug.Log("플레이어 공격! " + enemyCharacter.EnemyName + "에게 데미지: " + playerDamage);

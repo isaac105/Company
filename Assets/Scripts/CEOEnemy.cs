@@ -11,6 +11,7 @@ public class CEOEnemy : EnemyCharacter
         damage = 50f;
         attackCoefficient = 2.0f;
         defenseCoefficient = 1.8f;
+        baseDefenseChance = 0.65f; // 사장: 65% 방어 확률 (최고)
         
         base.InitializeEnemy();
         

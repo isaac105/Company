@@ -33,7 +33,10 @@ public static class ItemEffectProcessor
         {
             case ItemEffectType.BlockNextDefense:
                 Debug.Log("적의 다음 방어를 봉인합니다!");
-                // TODO: 방어 봉인 로직 구현
+                if (enemy != null)
+                {
+                    enemy.BlockNextDefense();
+                }
                 break;
                 
             case ItemEffectType.DoubleAttack:
@@ -42,8 +45,11 @@ public static class ItemEffectProcessor
                 break;
                 
             case ItemEffectType.ReduceEnemyDefense:
-                Debug.Log("적의 방어력을 " + (effectValue * 100) + "% 감소시킵니다!");
-                // TODO: 방어력 감소 로직 구현
+                Debug.Log("적의 방어 확률을 " + (effectValue * 100) + "% 감소시킵니다!");
+                if (enemy != null)
+                {
+                    enemy.ReduceDefenseChance(effectValue);
+                }
                 break;
                 
             case ItemEffectType.HighDamage:

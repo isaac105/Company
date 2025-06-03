@@ -11,10 +11,10 @@ public class HotCoffee : Item
         // 기본 속성 설정
         itemName = "뜨거운 커피잔";
         damageCoefficient = 1.0f;
-        
+
         // 특수 효과 추가
-        AddEffect(ItemEffectType.BlockNextDefense, 1f, "방어 봉인");
-        
+        AddEffect(ItemEffectType.ReduceEnemyDefense, 0.3f, "방어 확률 30% 감소");
+
         // CombatManager 찾기
         combatManager = FindObjectOfType<CombatManager>();
         
