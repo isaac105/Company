@@ -221,6 +221,6 @@ MonoBehaviour
 
 ---
 
-**개발 환경**: Unity 2022.3 LTS  
+**개발 환경**: Unity 6000.0.45f1
 **스크립팅**: C# (.NET Standard 2.1)  
 **UI 시스템**: Unity UI (uGUI)
