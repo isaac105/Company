@@ -222,7 +222,7 @@ GameObject:
   - component: {fileID: 69455576}
   - component: {fileID: 69455575}
   m_Layer: 0
-  m_Name: DefenseSuccessZone
+  m_Name: DefenseZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -245,7 +245,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 30, y: 50}
+  m_SizeDelta: {x: 50, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &69455575
 MonoBehaviour:
@@ -260,7 +260,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0, a: 0.9}
+  m_Color: {r: 0.2, g: 0.8, b: 0.2, a: 0.5}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -320,7 +320,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 150, y: 50}
+  m_SizeDelta: {x: 400, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &176341567
 MonoBehaviour:
@@ -335,7 +335,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 0, a: 0.8}
+  m_Color: {r: 0.5, g: 0.8, b: 0.5, a: 0.5}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -762,6 +762,7 @@ GameObject:
   - component: {fileID: 525473687}
   - component: {fileID: 525473689}
   - component: {fileID: 525473688}
+  - component: {fileID: 525473690}
   m_Layer: 0
   m_Name: DefenseTimingPanel
   m_TagString: Untagged
@@ -828,6 +829,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 525473686}
   m_CullTransparentMesh: 1
+--- !u!114 &525473690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 525473686}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c78c4c891137d452aa175531a76a50fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  barSpeed: 7
+  barWidth: 800
+  defenseZone: {fileID: 69455574}
+  indicator: {fileID: 1953935383}
+  perfectDefenseBonus: 0.3
 --- !u!1 &551920949
 GameObject:
   m_ObjectHideFlags: 0
@@ -1180,6 +1198,8 @@ MonoBehaviour:
   playerHpText: {fileID: 1175120354}
   enemyHpText: {fileID: 1332465814}
   stageText: {fileID: 1825209098}
+  attackTimingSystem: {fileID: 0}
+  defenseTimingSystem: {fileID: 0}
 --- !u!4 &663841662
 Transform:
   m_ObjectHideFlags: 0
@@ -2131,6 +2151,7 @@ GameObject:
   - component: {fileID: 1252905762}
   - component: {fileID: 1252905764}
   - component: {fileID: 1252905763}
+  - component: {fileID: 1252905765}
   m_Layer: 0
   m_Name: AttackTimingPanel
   m_TagString: Untagged
@@ -2197,6 +2218,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1252905761}
   m_CullTransparentMesh: 1
+--- !u!114 &1252905765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1252905761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ae6a9d161548453aabe4b2deb1ee0f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  barSpeed: 5
+  barWidth: 800
+  goodZone: {fileID: 176341566}
+  greatZone: {fileID: 2063964566}
+  perfectZone: {fileID: 1961156153}
+  indicator: {fileID: 1143654934}
+  goodDamageMultiplier: 1
+  greatDamageMultiplier: 1.5
+  perfectDamageMultiplier: 2
 --- !u!1 &1286700403
 GameObject:
   m_ObjectHideFlags: 0

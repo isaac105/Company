@@ -17,6 +17,13 @@ public class CombatManager : MonoBehaviour
     public Text enemyHpText;
     public Text stageText;
     
+    [Header("타이밍 시스템")]
+    public AttackTimingSystem attackTimingSystem;
+    public DefenseTimingSystem defenseTimingSystem;
+    private float currentDamageMultiplier = 1.0f;
+    private bool defenseSuccess = false;
+    private float defenseBonus = 0f;
+    
     private enum State { ItemSelect, AttackTiming, EnemyAttack, DefenseTiming }
     private State currentState;
     private Item selectedItem;
@@ -28,6 +35,12 @@ public class CombatManager : MonoBehaviour
             
         if (enemyCharacter == null)
             enemyCharacter = FindObjectOfType<AssistantManagerEnemy>();
+            
+        if (attackTimingSystem == null)
+            attackTimingSystem = attackTimingPanel.GetComponent<AttackTimingSystem>();
+            
+        if (defenseTimingSystem == null)
+            defenseTimingSystem = defenseTimingPanel.GetComponent<DefenseTimingSystem>();
             
         SetState(State.ItemSelect);
         
@@ -64,8 +77,22 @@ public class CombatManager : MonoBehaviour
         currentState = newState;
         
         if (itemPanel) itemPanel.SetActive(newState == State.ItemSelect);
-        if (attackTimingPanel) attackTimingPanel.SetActive(newState == State.AttackTiming);
-        if (defenseTimingPanel) defenseTimingPanel.SetActive(newState == State.DefenseTiming);
+        if (attackTimingPanel) 
+        {
+            attackTimingPanel.SetActive(newState == State.AttackTiming);
+            if (newState == State.AttackTiming && attackTimingSystem != null)
+            {
+                attackTimingSystem.StartTimingGame();
+            }
+        }
+        if (defenseTimingPanel) 
+        {
+            defenseTimingPanel.SetActive(newState == State.DefenseTiming);
+            if (newState == State.DefenseTiming && defenseTimingSystem != null)
+            {
+                defenseTimingSystem.StartTimingGame();
+            }
+        }
         
         Debug.Log("전투 상태 변경: " + newState);
     }
@@ -77,6 +104,17 @@ public class CombatManager : MonoBehaviour
         SetState(State.AttackTiming);
     }
     
+    public void SetDamageMultiplier(float multiplier)
+    {
+        currentDamageMultiplier = multiplier;
+    }
+    
+    public void SetDefenseResult(bool success, float bonus)
+    {
+        defenseSuccess = success;
+        defenseBonus = bonus;
+    }
+    
     void ExecuteAttack()
     {
         if (playerCharacter == null || enemyCharacter == null)
@@ -85,7 +123,7 @@ public class CombatManager : MonoBehaviour
             return;
         }
         
-        float playerDamage = playerCharacter.CalculateAttackDamage();
+        float playerDamage = playerCharacter.CalculateAttackDamage() * currentDamageMultiplier;
         
         if (selectedItem != null)
         {
@@ -187,8 +225,23 @@ public class CombatManager : MonoBehaviour
         
         float enemyDamage = enemyCharacter.CalculateAttackDamage();
         
+        // 방어 성공 여부 판정
+        if (defenseSuccess || (Random.Range(0f, 1f) < enemyCharacter.BaseDefenseChance + defenseBonus))
+        {
+            Debug.Log("방어 성공! 데미지 무효화!");
+            enemyDamage = 0;
+        }
+        else
+        {
+            Debug.Log("방어 실패!");
+        }
+        
         playerCharacter.TakeDamage(enemyDamage);
         Debug.Log(enemyCharacter.EnemyName + " 공격! 받은 데미지: " + enemyDamage);
+        
+        // 방어 결과 초기화
+        defenseSuccess = false;
+        defenseBonus = 0f;
         
         if (playerCharacter.HP <= 0)
         {
