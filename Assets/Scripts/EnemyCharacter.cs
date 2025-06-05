@@ -164,13 +164,13 @@ public class EnemyCharacter : MonoBehaviour
         return defended;
     }
     
-    public virtual void TakeDamage(float damage)
+    public virtual bool TryTakeDamage(float damage)
     {
         // 방어 시도
         if (TryDefense())
         {
-            Debug.Log(enemyName + "이 공격을 완전히 방어했습니다! (데미지: 0)");
-            return;
+            Debug.Log(enemyName + "이 공격을 완전히 방어했습니다!");
+            return false;
         }
         
         // 방어 실패 시 데미지 계산
@@ -189,6 +189,8 @@ public class EnemyCharacter : MonoBehaviour
         {
             OnEnemyDeath();
         }
+        
+        return true;
     }
     
     // 아이템 효과로 방어 봉인

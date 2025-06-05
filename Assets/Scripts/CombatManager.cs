@@ -152,23 +152,25 @@ public class CombatManager : MonoBehaviour
         {
             playerDamage *= selectedItem.DamageCoefficient;
             
-            // 아이템 날라가기 효과 시작
+            // 연속공격 효과 확인
+            if (selectedItem.HasEffect(ItemEffectType.DoubleAttack))
+            {
+                int attackCount = (int)selectedItem.GetEffectValue(ItemEffectType.DoubleAttack);
+                ExecuteMultipleAttacks(attackCount);
+                return;
+            }
+            
+            // 아이템 날라가기 효과 시작 (일반 공격)
             StartCoroutine(FlyItemToEnemy(selectedItem.gameObject, () => {
-                // 연속공격 효과 확인
-                if (selectedItem.HasEffect(ItemEffectType.DoubleAttack))
-                {
-                    int attackCount = (int)selectedItem.GetEffectValue(ItemEffectType.DoubleAttack);
-                    ExecuteMultipleAttacks(playerDamage, attackCount);
-                    return;
-                }
-                
                 // 다른 특수 효과 적용
                 selectedItem.ApplyItemEffects(playerCharacter, enemyCharacter, this);
                 
-                // 데미지 적용 및 표시
-                enemyCharacter.TakeDamage(playerDamage);
-                ShowDamageText(playerDamage, enemyCharacter.transform.position);
-                Debug.Log("플레이어 공격! " + enemyCharacter.EnemyName + "에게 데미지: " + playerDamage);
+                // 데미지 적용 시도
+                bool wasDefended = !enemyCharacter.TryTakeDamage(playerDamage);
+                
+                // 데미지 또는 방어 텍스트 표시
+                ShowDamageText(playerDamage, enemyCharacter.transform.position, wasDefended);
+                Debug.Log("플레이어 공격! " + (wasDefended ? "방어됨!" : enemyCharacter.EnemyName + "에게 데미지: " + playerDamage));
                 
                 // 플레이어 턴 종료 - 적의 일회성 효과 리셋
                 enemyCharacter.EndTurn();
@@ -265,7 +267,7 @@ public class CombatManager : MonoBehaviour
     }
     
     // 데미지 텍스트 표시
-    void ShowDamageText(float damage, Vector3 position)
+    void ShowDamageText(float damage, Vector3 position, bool isDefended = false)
     {
         if (damageTextPrefab == null || gameCanvas == null) return;
         
@@ -280,7 +282,16 @@ public class CombatManager : MonoBehaviour
         Text damageText = damageTextObj.GetComponent<Text>();
         if (damageText != null)
         {
-            damageText.text = $"-{damage:F0}";
+            if (isDefended)
+            {
+                damageText.text = "방어됨";
+                damageText.color = Color.green;
+            }
+            else
+            {
+                damageText.text = $"-{damage:F0}";
+                damageText.color = Color.red;
+            }
             StartCoroutine(AnimateDamageText(rectTransform));
         }
     }
@@ -289,7 +300,7 @@ public class CombatManager : MonoBehaviour
     IEnumerator AnimateDamageText(RectTransform textTransform)
     {
         float elapsed = 0f;
-        Vector3 startPos = textTransform.position;  // position 사용
+        Vector3 startPos = textTransform.position;
         Color startColor = textTransform.GetComponent<Text>().color;
         
         while (elapsed < damageTextDuration)
@@ -299,7 +310,7 @@ public class CombatManager : MonoBehaviour
             
             // 위로 올라가면서 페이드아웃
             Vector3 currentPos = startPos + Vector3.up * (damageTextRiseDistance * normalizedTime);
-            textTransform.position = currentPos;  // position 사용
+            textTransform.position = currentPos;
             
             // 크기도 약간 커지도록
             float scale = Mathf.Lerp(1f, 1.2f, normalizedTime);
@@ -316,24 +327,45 @@ public class CombatManager : MonoBehaviour
     }
     
     // 연속 공격 처리
-    void ExecuteMultipleAttacks(float baseDamage, int attackCount)
+    void ExecuteMultipleAttacks(int attackCount)
     {
-        StartCoroutine(MultipleAttackSequence(baseDamage, attackCount));
+        StartCoroutine(MultipleAttackSequence(attackCount));
     }
     
-    IEnumerator MultipleAttackSequence(float baseDamage, int attackCount)
+    IEnumerator MultipleAttackSequence(int attackCount)
     {
         for (int i = 0; i < attackCount; i++)
         {
             if (enemyCharacter.HP <= 0) break;
             
-            // 데미지 적용 및 표시
-            enemyCharacter.TakeDamage(baseDamage);
-            ShowDamageText(baseDamage, enemyCharacter.transform.position);
-            Debug.Log($"연속 공격 {i + 1}번째! 데미지: {baseDamage}");
+            // 각 공격마다 새로운 데미지 계산 (아이템 계수와 타이밍 배율 포함)
+            float currentDamage = playerCharacter.CalculateAttackDamage() * currentDamageMultiplier;
+            if (selectedItem != null)
+            {
+                currentDamage *= selectedItem.DamageCoefficient;
+            }
             
-            yield return new WaitForSeconds(0.5f); // 연속 공격 간 딜레이
+            // 아이템 날라가기 효과 실행
+            yield return StartCoroutine(FlyItemToEnemy(selectedItem.gameObject, null));
+            
+            // 데미지 적용 시도
+            bool wasDefended = !enemyCharacter.TryTakeDamage(currentDamage);
+            
+            // 데미지 또는 방어 텍스트 표시
+            ShowDamageText(currentDamage, enemyCharacter.transform.position, wasDefended);
+            Debug.Log($"연속 공격 {i + 1}번째! " + (wasDefended ? "방어됨!" : $"데미지: {currentDamage}"));
+            
+            yield return new WaitForSeconds(0.3f); // 연속 공격 간 딜레이
         }
+        
+        // 다른 특수 효과 적용
+        if (selectedItem != null)
+        {
+            selectedItem.ApplyItemEffects(playerCharacter, enemyCharacter, this);
+        }
+        
+        // 플레이어 턴 종료 - 적의 일회성 효과 리셋
+        enemyCharacter.EndTurn();
         
         // 전투 상태 확인 및 변경
         if (enemyCharacter.HP <= 0)
@@ -360,20 +392,29 @@ public class CombatManager : MonoBehaviour
         }
         
         float enemyDamage = enemyCharacter.CalculateAttackDamage();
+        bool wasDefended = false;
         
         // 방어 성공 여부 판정
         if (defenseSuccess || (Random.Range(0f, 1f) < enemyCharacter.BaseDefenseChance + defenseBonus))
         {
             Debug.Log("방어 성공! 데미지 무효화!");
             enemyDamage = 0;
+            wasDefended = true;
+            playerCharacter.DefenseSuccess = true;
         }
         else
         {
             Debug.Log("방어 실패!");
+            playerCharacter.DefenseSuccess = false;
         }
         
-        playerCharacter.TakeDamage(enemyDamage);
-        Debug.Log(enemyCharacter.EnemyName + " 공격! 받은 데미지: " + enemyDamage);
+        // 데미지 적용 및 텍스트 표시
+        if (!wasDefended)
+        {
+            playerCharacter.TryTakeDamage(enemyDamage);
+        }
+        ShowDamageText(enemyDamage, playerCharacter.transform.position, wasDefended);
+        Debug.Log(enemyCharacter.EnemyName + " 공격! " + (wasDefended ? "방어됨!" : "받은 데미지: " + enemyDamage));
         
         // 방어 결과 초기화
         defenseSuccess = false;

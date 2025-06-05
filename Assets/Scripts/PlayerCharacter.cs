@@ -18,6 +18,9 @@ public class PlayerCharacter : MonoBehaviour
     [Header("디버그 정보")]
     [SerializeField] private string currentItemDebugInfo = "None";
 
+    [Header("방어 시스템")]
+    private bool defenseSuccess = false;
+
     public float HP
     {
         get { return hp; }
@@ -71,6 +74,12 @@ public class PlayerCharacter : MonoBehaviour
         set { defenseCoefficient = value; } 
     }
     
+    public bool DefenseSuccess
+    {
+        get { return defenseSuccess; }
+        set { defenseSuccess = value; }
+    }
+    
     void Start()
     {
         if (maxHp <= 0) maxHp = 100f;
@@ -86,8 +95,15 @@ public class PlayerCharacter : MonoBehaviour
         Debug.Log("플레이어 캐릭터 초기화 완료: HP " + hp + "/" + maxHp);
     }
     
-    public void TakeDamage(float damage)
+    public bool TryTakeDamage(float damage)
     {
+        // 방어 성공 여부 확인
+        if (defenseSuccess)
+        {
+            Debug.Log("플레이어가 공격을 완전히 방어했습니다!");
+            return false;
+        }
+        
         float finalDamage = damage / defenseCoefficient;
         HP -= finalDamage;
         
@@ -103,6 +119,8 @@ public class PlayerCharacter : MonoBehaviour
         {
             OnPlayerDeath();
         }
+        
+        return true;
     }
     
     private void CheckHPState()
