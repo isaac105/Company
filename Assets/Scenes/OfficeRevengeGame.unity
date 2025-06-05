@@ -536,6 +536,7 @@ RectTransform:
   - {fileID: 183189331}
   - {fileID: 1961296005}
   - {fileID: 574634050}
+  - {fileID: 323685042}
   m_Father: {fileID: 862575375}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
@@ -581,6 +582,41 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 249930303}
   m_CullTransparentMesh: 1
+--- !u!1 &323685041
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 323685042}
+  m_Layer: 0
+  m_Name: EnemySpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &323685042
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 323685041}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 249930304}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: -100, y: 180}
+  m_SizeDelta: {x: 200, y: 350}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &418044698
 GameObject:
   m_ObjectHideFlags: 0
@@ -960,8 +996,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 150, y: 150}
-  m_SizeDelta: {x: 150, y: 300}
+  m_AnchoredPosition: {x: 200, y: 180}
+  m_SizeDelta: {x: 200, y: 350}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &574634051
 MonoBehaviour:
@@ -983,7 +1019,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 6516294358917497472, guid: e31641d48c6cb4e4eb8d4f6b214f045d, type: 3}
+  m_Sprite: {fileID: -3456501521391519884, guid: bababb3acf53e45d5a6a6c4a6b6bb93f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1198,8 +1234,9 @@ MonoBehaviour:
   playerHpText: {fileID: 1175120354}
   enemyHpText: {fileID: 1332465814}
   stageText: {fileID: 1825209098}
-  attackTimingSystem: {fileID: 0}
-  defenseTimingSystem: {fileID: 0}
+  attackTimingSystem: {fileID: 1252905765}
+  defenseTimingSystem: {fileID: 525473690}
+  stageManager: {fileID: 1673489258}
 --- !u!4 &663841662
 Transform:
   m_ObjectHideFlags: 0
@@ -3034,6 +3071,74 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1583739498}
   m_CullTransparentMesh: 1
+--- !u!1 &1673489257
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1673489259}
+  - component: {fileID: 1673489258}
+  m_Layer: 0
+  m_Name: StageManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1673489258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1673489257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bc7ea20564db48999f2899cad8c89f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stages:
+  - stageName: Stage 1
+    enemyRank: "\uB300\uB9AC"
+    enemyPrefab: {fileID: 8227372067973445977, guid: 9244decdeb8da4413a8bc00c1e6413ea, type: 3}
+    unlockedItemPrefab: {fileID: 0}
+  - stageName: Stage 2
+    enemyRank: "\uACFC\uC7A5"
+    enemyPrefab: {fileID: 2428679871686257419, guid: 141a67f42e54c498b863639e7522735f, type: 3}
+    unlockedItemPrefab: {fileID: 0}
+  - stageName: Stage 3
+    enemyRank: "\uBD80\uC7A5"
+    enemyPrefab: {fileID: 5882187382232122843, guid: c92a5429ed1554b9f9c86da5dc52a421, type: 3}
+    unlockedItemPrefab: {fileID: 0}
+  - stageName: Stage 4
+    enemyRank: "\uC774\uC0AC"
+    enemyPrefab: {fileID: 5975087016144476009, guid: c9112c878424847ab83db6cc75df194d, type: 3}
+    unlockedItemPrefab: {fileID: 0}
+  - stageName: Stage 5
+    enemyRank: "\uC0AC\uC7A5"
+    enemyPrefab: {fileID: 267962941121110118, guid: 7b829c43ed3ca447ea325c39bb8d495c, type: 3}
+    unlockedItemPrefab: {fileID: 0}
+  enemySpawnPoint: {fileID: 323685042}
+  currentStageIndex: 0
+  stageCleared: 
+--- !u!4 &1673489259
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1673489257}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1759486721
 GameObject:
   m_ObjectHideFlags: 0
@@ -3791,7 +3896,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1961296005
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3907,19 +4012,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 731ba18bc45674b588776d719776f282, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hp: 0
-  damage: 15
-  attackCoefficient: 0
-  defenseCoefficient: 0
-  currentItem: {fileID: 0}
-  maxHp: 0
-  enemyName: "\uC801"
-  enemyRank: Unknown
-  baseDefenseChance: 0.3
-  isDefenseBlocked: 0
-  defenseReduction: 0
-  currentItemDebugInfo: None
-  lastActionWasDefense: 0
 --- !u!1 &2046391090
 GameObject:
   m_ObjectHideFlags: 0
@@ -4051,7 +4143,7 @@ Transform:
   m_GameObject: {fileID: 2046391090}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalPosition: {x: 81.658646, y: 29.220459, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4140,3 +4232,4 @@ SceneRoots:
   - {fileID: 2046391094}
   - {fileID: 222872212}
   - {fileID: 663841662}
+  - {fileID: 1673489259}

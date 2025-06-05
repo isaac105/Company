@@ -10,7 +10,7 @@ public class CombatManager : MonoBehaviour
     
     [Header("캐릭터")]
     public PlayerCharacter playerCharacter;
-    public AssistantManagerEnemy enemyCharacter;
+    public EnemyCharacter enemyCharacter;
     
     [Header("UI 텍스트")]
     public Text playerHpText;
@@ -24,6 +24,9 @@ public class CombatManager : MonoBehaviour
     private bool defenseSuccess = false;
     private float defenseBonus = 0f;
     
+    [Header("스테이지 시스템")]
+    public StageManager stageManager;
+    
     private enum State { ItemSelect, AttackTiming, EnemyAttack, DefenseTiming }
     private State currentState;
     private Item selectedItem;
@@ -34,7 +37,7 @@ public class CombatManager : MonoBehaviour
             playerCharacter = FindObjectOfType<PlayerCharacter>();
             
         if (enemyCharacter == null)
-            enemyCharacter = FindObjectOfType<AssistantManagerEnemy>();
+            enemyCharacter = FindObjectOfType<EnemyCharacter>();
             
         if (attackTimingSystem == null)
             attackTimingSystem = attackTimingPanel.GetComponent<AttackTimingSystem>();
@@ -42,16 +45,25 @@ public class CombatManager : MonoBehaviour
         if (defenseTimingSystem == null)
             defenseTimingSystem = defenseTimingPanel.GetComponent<DefenseTimingSystem>();
             
+        if (stageManager == null)
+            stageManager = FindObjectOfType<StageManager>();
+            
         SetState(State.ItemSelect);
         
         Debug.Log("CombatManager 초기화 완료!");
         Debug.Log("PlayerCharacter: " + (playerCharacter != null ? playerCharacter.gameObject.name : "없음"));
-        Debug.Log("AssistantManagerEnemy: " + (enemyCharacter != null ? enemyCharacter.gameObject.name : "없음"));
+        Debug.Log("EnemyCharacter: " + (enemyCharacter != null ? enemyCharacter.gameObject.name : "없음"));
         
         if (enemyCharacter != null)
         {
             Debug.Log("현재 적: " + enemyCharacter.EnemyName + " (" + enemyCharacter.EnemyRank + ")");
         }
+    }
+    
+    public void SetEnemy(EnemyCharacter newEnemy)
+    {
+        enemyCharacter = newEnemy;
+        UpdateUI();
     }
     
     void Update()
@@ -119,7 +131,7 @@ public class CombatManager : MonoBehaviour
     {
         if (playerCharacter == null || enemyCharacter == null)
         {
-            Debug.LogError("PlayerCharacter 또는 AssistantManagerEnemy가 없습니다!");
+            Debug.LogError("PlayerCharacter 또는 EnemyCharacter가 없습니다!");
             return;
         }
         
@@ -150,6 +162,10 @@ public class CombatManager : MonoBehaviour
         if (enemyCharacter.HP <= 0)
         {
             Debug.Log(enemyCharacter.EnemyName + " 사망! 승리!");
+            if (stageManager != null)
+            {
+                stageManager.OnEnemyDefeated();
+            }
             SetState(State.ItemSelect);
         }
         else
@@ -207,6 +223,10 @@ public class CombatManager : MonoBehaviour
         if (enemyCharacter.HP <= 0)
         {
             Debug.Log(enemyCharacter.EnemyName + " 사망! 승리!");
+            if (stageManager != null)
+            {
+                stageManager.OnEnemyDefeated();
+            }
             SetState(State.ItemSelect);
         }
         else
@@ -219,7 +239,7 @@ public class CombatManager : MonoBehaviour
     {
         if (playerCharacter == null || enemyCharacter == null)
         {
-            Debug.LogError("PlayerCharacter 또는 AssistantManagerEnemy가 없습니다!");
+            Debug.LogError("PlayerCharacter 또는 EnemyCharacter가 없습니다!");
             return;
         }
         
@@ -262,8 +282,8 @@ public class CombatManager : MonoBehaviour
         if (enemyHpText && enemyCharacter)
             enemyHpText.text = enemyCharacter.EnemyName + " HP: " + enemyCharacter.HP.ToString("F0") + "/" + enemyCharacter.MaxHP.ToString("F0");
             
-        if (stageText)
-            stageText.text = "상태: " + GetStateDisplayText() + " | 적: " + (enemyCharacter != null ? enemyCharacter.EnemyRank : "없음");
+        if (stageText && stageManager != null)
+            stageText.text = "스테이지: " + (stageManager.GetCurrentStage() + 1) + " | 상태: " + GetStateDisplayText() + " | 적: " + stageManager.GetCurrentEnemyRank();
     }
     
     string GetStateDisplayText()
