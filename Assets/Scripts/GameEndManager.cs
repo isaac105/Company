@@ -20,6 +20,7 @@ public class GameEndManager : MonoBehaviour
     private bool isGameEnded = false;
     private float blinkTimer = 0f;
     private bool isGameCleared = false; // 게임 클리어 상태 추가
+    private BGMManager bgmManager;
     
     void Start()
     {
@@ -30,7 +31,6 @@ public class GameEndManager : MonoBehaviour
         if (restartText != null)
         {
             restartText.text = "R 버튼을 눌러 재시작";
-            // restartText.fontSize = textFontSize;
             restartText.gameObject.SetActive(false);
         }
         
@@ -50,6 +50,9 @@ public class GameEndManager : MonoBehaviour
                 videoScreen.texture = videoPlayer.targetTexture;
             }
         }
+        
+        // BGM 매니저 찾기
+        bgmManager = FindFirstObjectByType<BGMManager>();
     }
     
     void Update()
@@ -81,6 +84,12 @@ public class GameEndManager : MonoBehaviour
             isGameEnded = true;
             isGameCleared = false;
             PlayEndVideo(gameOverVideo);
+            
+            // 게임 오버 BGM 재생
+            if (bgmManager != null)
+            {
+                bgmManager.PlayBGM("Defeat");
+            }
         }
     }
     
@@ -91,6 +100,12 @@ public class GameEndManager : MonoBehaviour
             isGameEnded = true;
             isGameCleared = true;
             PlayEndVideo(gameClearVideo);
+            
+            // 승리 BGM 재생
+            if (bgmManager != null)
+            {
+                bgmManager.PlayBGM("Victory");
+            }
         }
     }
     
@@ -137,6 +152,12 @@ public class GameEndManager : MonoBehaviour
         // 게임 재시작 처리
         var stageManager = FindFirstObjectByType<StageManager>();
         var combatManager = FindFirstObjectByType<CombatManager>();
+        
+        // BGM을 Normal로 변경
+        if (bgmManager != null)
+        {
+            bgmManager.PlayBGM("Normal");
+        }
         
         if (isGameCleared)
         {

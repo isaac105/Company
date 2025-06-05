@@ -1309,6 +1309,66 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 581765930}
   m_CullTransparentMesh: 1
+--- !u!1 &656125842
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 656125844}
+  - component: {fileID: 656125843}
+  m_Layer: 0
+  m_Name: BGMManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &656125843
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 656125842}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20b10407558c1485c91572ffae7191f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bgmList:
+  - stateName: Normal
+    clip: {fileID: 8300000, guid: 033766cc31c97904bae4404b8a079544, type: 3}
+    volume: 0.2
+  - stateName: Battle
+    clip: {fileID: 8300000, guid: 033766cc31c97904bae4404b8a079544, type: 3}
+    volume: 0.2
+  - stateName: Victory
+    clip: {fileID: 8300000, guid: 9faa3a8acf7ec54449fd9f2c2dd8f76c, type: 3}
+    volume: 0.2
+  - stateName: Defeat
+    clip: {fileID: 8300000, guid: 697e070f642cbfe4db41b1469c49d381, type: 3}
+    volume: 0.2
+  fadeSpeed: 1
+  playOnAwake: 1
+  currentState: Normal
+--- !u!4 &656125844
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 656125842}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 193.51337, y: 518.5801, z: -4.3943615}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &663841660
 GameObject:
   m_ObjectHideFlags: 0
@@ -4536,3 +4596,4 @@ SceneRoots:
   - {fileID: 1673489259}
   - {fileID: 875088606}
   - {fileID: 400011752}
+  - {fileID: 656125844}

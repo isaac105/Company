@@ -43,6 +43,9 @@ public class CombatManager : MonoBehaviour
     [Header("스테이지 시스템")]
     public StageManager stageManager;
     
+    [Header("BGM 설정")]
+    private BGMManager bgmManager;
+    
     public enum State { ItemSelect, AttackTiming, EnemyAttack, DefenseTiming }
     private State currentState;
     private Item selectedItem;
@@ -63,6 +66,13 @@ public class CombatManager : MonoBehaviour
             
         if (stageManager == null)
             stageManager = FindFirstObjectByType<StageManager>();
+            
+        // BGM 매니저 찾기
+        bgmManager = FindFirstObjectByType<BGMManager>();
+        if (bgmManager != null)
+        {
+            bgmManager.PlayBGM("Normal");
+        }
             
         // 버튼 이벤트 등록
         if (attackButton != null)
@@ -124,6 +134,21 @@ public class CombatManager : MonoBehaviour
     public void SetState(State newState)
     {
         currentState = newState;
+        
+        // BGM 상태 변경
+        if (bgmManager != null)
+        {
+            switch (newState)
+            {
+                case State.AttackTiming:
+                case State.DefenseTiming:
+                    bgmManager.PlayBGM("Battle");
+                    break;
+                case State.ItemSelect:
+                    bgmManager.PlayBGM("Normal");
+                    break;
+            }
+        }
         
         if (itemPanel) itemPanel.SetActive(newState == State.ItemSelect);
         if (attackTimingPanel) 
@@ -222,12 +247,17 @@ public class CombatManager : MonoBehaviour
                         var gameEndManager = FindAnyObjectByType<GameEndManager>();
                         if (gameEndManager != null)
                         {
+                            bgmManager.PlayBGM("Victory");
                             gameEndManager.ShowGameClear();
                         }
                     }
                     else if (stageManager != null)
                     {
                         stageManager.OnEnemyDefeated();
+                        if (bgmManager != null)
+                        {
+                            bgmManager.PlayBGM("Normal");
+                        }
                     }
                     
                     SetState(State.ItemSelect);
@@ -432,6 +462,10 @@ public class CombatManager : MonoBehaviour
             else if (stageManager != null)
             {
                 stageManager.OnEnemyDefeated();
+                if (bgmManager != null)
+                {
+                    bgmManager.PlayBGM("Normal");
+                }
             }
             
             SetState(State.ItemSelect);
@@ -482,6 +516,12 @@ public class CombatManager : MonoBehaviour
         if (playerCharacter.HP <= 0)
         {
             Debug.Log("플레이어 사망! 패배!");
+            var gameEndManager = FindAnyObjectByType<GameEndManager>();
+            if (gameEndManager != null)
+            {
+                bgmManager.PlayBGM("Defeat");
+                gameEndManager.ShowGameOver();
+            }
             SetState(State.ItemSelect);
         }
         else

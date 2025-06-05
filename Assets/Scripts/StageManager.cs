@@ -60,6 +60,13 @@ public class StageManager : MonoBehaviour
         Debug.Log("StageManager Start");
         combatManager = FindFirstObjectByType<CombatManager>();
         
+        // 초기 BGM 설정
+        var bgmManager = FindFirstObjectByType<BGMManager>();
+        if (bgmManager != null)
+        {
+            bgmManager.PlayBGM("Normal");
+        }
+        
         if (!isInitialized)
         {
             InitializeItemStates();
