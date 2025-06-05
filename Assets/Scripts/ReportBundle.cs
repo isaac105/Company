@@ -9,13 +9,13 @@ public class ReportBundle : Item
     protected override void Start()
     {
         // 기본 속성 설정
-        itemName = "얇은 보고서 뭉치";
+        itemName = "보고서 뭉치";
         damageCoefficient = 1.5f;
         
         // 기본 제공 아이템이므로 특수 효과 없음
         
         // CombatManager 찾기
-        combatManager = FindObjectOfType<CombatManager>();
+        combatManager = FindAnyObjectByType<CombatManager>();
         
         reportBundleButton = GetComponent<Button>();
         
@@ -38,8 +38,8 @@ public class ReportBundle : Item
         
         if (combatManager != null)
         {
-            // CombatManager에 아이템 선택 알림
-            combatManager.OnItemSelected(this);
+            // CombatManager에 아이템 선택 알림 (전투 시작)
+            combatManager.OnItemSelected(this, true);
             Debug.Log("CombatManager에 아이템 선택 전달: " + GetItemInfo());
         }
         else
@@ -48,7 +48,7 @@ public class ReportBundle : Item
         }
         
         // PlayerCharacter에도 장착
-        PlayerCharacter player = FindObjectOfType<PlayerCharacter>();
+        PlayerCharacter player = FindAnyObjectByType<PlayerCharacter>();
         if (player != null)
         {
             player.EquipItem(this);

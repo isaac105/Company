@@ -78,7 +78,7 @@ public class AttackTimingSystem : MonoBehaviour
         UpdateIndicatorPosition();
     }
     
-    void CheckTiming()
+    public void CheckTiming()
     {
         isMoving = false;
         float multiplier = 1.0f;
@@ -103,11 +103,11 @@ public class AttackTimingSystem : MonoBehaviour
         
         Debug.Log($"타이밍 결과: {result} (데미지 배율: x{multiplier})");
         
-        // CombatManager에 결과 전달
-        var combatManager = FindObjectOfType<CombatManager>();
+        // CombatManager에 데미지 배율 전달
+        var combatManager = FindAnyObjectByType<CombatManager>();
         if (combatManager != null)
         {
-            // TODO: CombatManager에 데미지 배율 적용 메서드 추가
+            combatManager.SetDamageMultiplier(multiplier);
         }
     }
     

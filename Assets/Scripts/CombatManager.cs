@@ -10,6 +10,10 @@ public class CombatManager : MonoBehaviour
     public GameObject defenseTimingPanel;
     public Canvas gameCanvas; // UI Canvas 참조 추가
     
+    [Header("UI 버튼")]
+    public Button attackButton;  // 공격 버튼
+    public Button defenseButton; // 방어 버튼
+    
     [Header("캐릭터")]
     public PlayerCharacter playerCharacter;
     public EnemyCharacter enemyCharacter;
@@ -18,6 +22,7 @@ public class CombatManager : MonoBehaviour
     public Text playerHpText;
     public Text enemyHpText;
     public Text stageText;
+    public Text itemTitleText; // 아이템 제목 텍스트
     
     [Header("전투 이펙트")]
     public GameObject damageTextPrefab;  // 데미지 텍스트 프리팹
@@ -38,7 +43,7 @@ public class CombatManager : MonoBehaviour
     [Header("스테이지 시스템")]
     public StageManager stageManager;
     
-    private enum State { ItemSelect, AttackTiming, EnemyAttack, DefenseTiming }
+    public enum State { ItemSelect, AttackTiming, EnemyAttack, DefenseTiming }
     private State currentState;
     private Item selectedItem;
     
@@ -58,6 +63,27 @@ public class CombatManager : MonoBehaviour
             
         if (stageManager == null)
             stageManager = FindObjectOfType<StageManager>();
+            
+        // 버튼 이벤트 등록
+        if (attackButton != null)
+        {
+            attackButton.onClick.AddListener(OnAttackButtonClick);
+            Debug.Log("공격 버튼 이벤트 등록 완료");
+        }
+        else
+        {
+            Debug.LogWarning("공격 버튼이 할당되지 않았습니다!");
+        }
+        
+        if (defenseButton != null)
+        {
+            defenseButton.onClick.AddListener(OnDefenseButtonClick);
+            Debug.Log("방어 버튼 이벤트 등록 완료");
+        }
+        else
+        {
+            Debug.LogWarning("방어 버튼이 할당되지 않았습니다!");
+        }
             
         SetState(State.ItemSelect);
         
@@ -95,7 +121,7 @@ public class CombatManager : MonoBehaviour
         }
     }
     
-    void SetState(State newState)
+    public void SetState(State newState)
     {
         currentState = newState;
         
@@ -120,11 +146,22 @@ public class CombatManager : MonoBehaviour
         Debug.Log("전투 상태 변경: " + newState);
     }
     
-    public void OnItemSelected(Item item)
+    // 아이템 선택만 처리 (전투 시작하지 않음)
+    public void OnItemSelected(Item item, bool startCombat = false)
     {
         selectedItem = item;
+        // 아이템 제목 업데이트
+        if (itemTitleText != null)
+        {
+            itemTitleText.text = "현재 아이템: " + (item != null ? item.ItemName : "없음");
+        }
         Debug.Log("아이템 선택됨: " + (item != null ? item.GetItemInfo() : "None"));
-        SetState(State.AttackTiming);
+        
+        // startCombat이 true일 때만 전투 시작
+        if (startCombat)
+        {
+            SetState(State.AttackTiming);
+        }
     }
     
     public void SetDamageMultiplier(float multiplier)
@@ -470,5 +507,46 @@ public class CombatManager : MonoBehaviour
         selectedItem = null;
         SetState(State.ItemSelect);
         Debug.Log("전투 리셋! " + (enemyCharacter != null ? enemyCharacter.EnemyName : "대리") + "와의 전투 재시작");
+    }
+    
+    // 공격 버튼 클릭 이벤트
+    public void OnAttackButtonClick()
+    {
+        if (currentState == State.AttackTiming)
+        {
+            Debug.Log("공격 버튼 클릭!");
+            if (attackTimingSystem != null)
+            {
+                attackTimingSystem.CheckTiming();
+            }
+            ExecuteAttack();
+        }
+    }
+    
+    // 방어 버튼 클릭 이벤트
+    public void OnDefenseButtonClick()
+    {
+        if (currentState == State.DefenseTiming)
+        {
+            Debug.Log("방어 버튼 클릭!");
+            if (defenseTimingSystem != null)
+            {
+                defenseTimingSystem.CheckTiming();
+            }
+            ExecuteDefense();
+        }
+    }
+    
+    private void OnDestroy()
+    {
+        // 버튼 이벤트 제거
+        if (attackButton != null)
+        {
+            attackButton.onClick.RemoveListener(OnAttackButtonClick);
+        }
+        if (defenseButton != null)
+        {
+            defenseButton.onClick.RemoveListener(OnDefenseButtonClick);
+        }
     }
 }

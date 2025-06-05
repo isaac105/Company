@@ -76,7 +76,7 @@ public class DefenseTimingSystem : MonoBehaviour
         UpdateIndicatorPosition();
     }
     
-    void CheckTiming()
+    public void CheckTiming()
     {
         isMoving = false;
         string result = "Miss";
@@ -93,7 +93,7 @@ public class DefenseTimingSystem : MonoBehaviour
         Debug.Log($"방어 타이밍 결과: {result} (추가 방어 확률: +{bonusDefense * 100}%)");
         
         // CombatManager에 결과 전달
-        var combatManager = FindObjectOfType<CombatManager>();
+        var combatManager = FindAnyObjectByType<CombatManager>();
         if (combatManager != null)
         {
             combatManager.SetDefenseResult(defenseSuccess, bonusDefense);

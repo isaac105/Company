@@ -34,6 +34,8 @@ public class StageManager : MonoBehaviour
     private GameObject currentEnemy;
     private bool isInitialized = false;
     
+    public bool IsInitialized { get { return isInitialized; } }
+    
     void Awake()
     {
         Debug.Log("StageManager Awake");
@@ -56,12 +58,13 @@ public class StageManager : MonoBehaviour
     void Start()
     {
         Debug.Log("StageManager Start");
-        combatManager = FindObjectOfType<CombatManager>();
+        combatManager = FindAnyObjectByType<CombatManager>();
         
         if (!isInitialized)
         {
             InitializeItemStates();
             isInitialized = true;
+            Debug.Log("StageManager 초기화 완료");
         }
         
         SpawnCurrentStageEnemy();
@@ -216,6 +219,14 @@ public class StageManager : MonoBehaviour
             {
                 UnlockItem(item, $"스테이지 {stageIndex} 클리어 보상");
                 found = true;
+                
+                // ItemSelectionManager에 아이템 해금 알림
+                var itemSelectionManager = FindAnyObjectByType<ItemSelectionManager>();
+                if (itemSelectionManager != null)
+                {
+                    itemSelectionManager.OnItemUnlocked();
+                }
+                
                 break;
             }
         }
