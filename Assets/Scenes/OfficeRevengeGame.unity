@@ -1346,6 +1346,7 @@ GameObject:
   - component: {fileID: 731199257}
   - component: {fileID: 731199260}
   - component: {fileID: 731199259}
+  - component: {fileID: 731199261}
   m_Layer: 0
   m_Name: HotCoffeeCup
   m_TagString: Untagged
@@ -1520,6 +1521,18 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &731199261
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 731199252}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1273e190612b94336b5956e47ba47e6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &862575371
 GameObject:
   m_ObjectHideFlags: 0
@@ -1659,6 +1672,7 @@ GameObject:
   - component: {fileID: 891302113}
   - component: {fileID: 891302116}
   - component: {fileID: 891302115}
+  - component: {fileID: 891302117}
   m_Layer: 0
   m_Name: LargeUSB
   m_TagString: Untagged
@@ -1833,6 +1847,18 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &891302117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 891302108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1273e190612b94336b5956e47ba47e6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &908248968
 GameObject:
   m_ObjectHideFlags: 0
@@ -1849,6 +1875,7 @@ GameObject:
   - component: {fileID: 908248973}
   - component: {fileID: 908248976}
   - component: {fileID: 908248975}
+  - component: {fileID: 908248977}
   m_Layer: 0
   m_Name: Stapler
   m_TagString: Untagged
@@ -2023,6 +2050,18 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &908248977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 908248968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1273e190612b94336b5956e47ba47e6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1143654933
 GameObject:
   m_ObjectHideFlags: 0
@@ -2292,6 +2331,7 @@ GameObject:
   - component: {fileID: 1286700408}
   - component: {fileID: 1286700411}
   - component: {fileID: 1286700410}
+  - component: {fileID: 1286700412}
   m_Layer: 0
   m_Name: UnapprovedDocuments
   m_TagString: Untagged
@@ -2466,6 +2506,18 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1286700412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1286700403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1273e190612b94336b5956e47ba47e6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1301466689
 GameObject:
   m_ObjectHideFlags: 0
@@ -3104,24 +3156,25 @@ MonoBehaviour:
   - stageName: Stage 1
     enemyRank: "\uB300\uB9AC"
     enemyPrefab: {fileID: 8227372067973445977, guid: 9244decdeb8da4413a8bc00c1e6413ea, type: 3}
-    unlockedItemPrefab: {fileID: 0}
+    unlockedItemPrefab: {fileID: 731199252}
   - stageName: Stage 2
     enemyRank: "\uACFC\uC7A5"
     enemyPrefab: {fileID: 2428679871686257419, guid: 141a67f42e54c498b863639e7522735f, type: 3}
-    unlockedItemPrefab: {fileID: 0}
+    unlockedItemPrefab: {fileID: 908248968}
   - stageName: Stage 3
     enemyRank: "\uBD80\uC7A5"
     enemyPrefab: {fileID: 5882187382232122843, guid: c92a5429ed1554b9f9c86da5dc52a421, type: 3}
-    unlockedItemPrefab: {fileID: 0}
+    unlockedItemPrefab: {fileID: 891302108}
   - stageName: Stage 4
     enemyRank: "\uC774\uC0AC"
     enemyPrefab: {fileID: 5975087016144476009, guid: c9112c878424847ab83db6cc75df194d, type: 3}
-    unlockedItemPrefab: {fileID: 0}
+    unlockedItemPrefab: {fileID: 1286700403}
   - stageName: Stage 5
     enemyRank: "\uC0AC\uC7A5"
     enemyPrefab: {fileID: 267962941121110118, guid: 7b829c43ed3ca447ea325c39bb8d495c, type: 3}
     unlockedItemPrefab: {fileID: 0}
   enemySpawnPoint: {fileID: 323685042}
+  itemPanel: {fileID: 1301466689}
   currentStageIndex: 0
   stageCleared: 
 --- !u!4 &1673489259
@@ -3403,6 +3456,7 @@ GameObject:
   - component: {fileID: 1820888566}
   - component: {fileID: 1820888565}
   - component: {fileID: 1820888569}
+  - component: {fileID: 1820888570}
   m_Layer: 0
   m_Name: ReportBundle
   m_TagString: Untagged
@@ -3556,6 +3610,18 @@ MonoBehaviour:
   damageCoefficient: 1
   itemName: "\uAE30\uBCF8 \uC544\uC774\uD15C"
   effects: []
+--- !u!114 &1820888570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1820888560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1273e190612b94336b5956e47ba47e6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1825209096
 GameObject:
   m_ObjectHideFlags: 0

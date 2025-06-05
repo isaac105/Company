@@ -16,73 +16,206 @@ public class StageManager : MonoBehaviour
     public List<StageData> stages = new List<StageData>();
     public Transform enemySpawnPoint;
     
+    [Header("UI 참조")]
+    [SerializeField] private GameObject itemPanel; // Inspector에서 할당할 수 있도록 추가
+    
     [Header("현재 스테이지 정보")]
     [SerializeField] private int currentStageIndex = 0;
     [SerializeField] private bool[] stageCleared;
     
     private CombatManager combatManager;
     private GameObject currentEnemy;
+    private bool isInitialized = false;
+    
+    void Awake()
+    {
+        Debug.Log("StageManager Awake");
+        stageCleared = new bool[stages.Count];
+        ResetAllProgress();
+        
+        // // 게임 최초 실행 여부 확인
+        // bool isFirstRun = PlayerPrefs.GetInt("IsFirstRun", 1) == 1;
+        // if (isFirstRun)
+        // {
+        //     Debug.Log("First time running the game - Initializing fresh stage progress");
+        //     ResetAllProgress();
+        // }
+        // else
+        // {
+        //     LoadStageProgress();
+        // }
+    }
     
     void Start()
     {
+        Debug.Log("StageManager Start");
         combatManager = FindObjectOfType<CombatManager>();
-        stageCleared = new bool[stages.Count];
         
-        // PlayerPrefs에서 스테이지 클리어 정보 로드
-        LoadStageProgress();
+        if (!isInitialized)
+        {
+            InitializeItemStates();
+            isInitialized = true;
+        }
         
-        // 첫 스테이지 시작
         SpawnCurrentStageEnemy();
+    }
+    
+    void InitializeItemStates()
+    {
+        Debug.Log("=== Initializing Item States ===");
+        if (itemPanel == null)
+        {
+            Debug.LogError("ItemPanel이 설정되지 않았습니다.");
+            return;
+        }
+
+        var items = itemPanel.GetComponentsInChildren<ItemLockState>(true);
+        Debug.Log($"Found {items.Length} items with ItemLockState");
+
+        foreach (var item in items)
+        {
+            if (item.gameObject.name.Contains("ReportBundle"))
+            {
+                UnlockItem(item, "기본 아이템");
+                continue;
+            }
+
+            bool isUnlocked = false;
+            for (int i = 0; i < stages.Count; i++)
+            {
+                if (stageCleared[i] && stages[i].unlockedItemPrefab != null &&
+                    item.gameObject.name.Contains(stages[i].unlockedItemPrefab.name))
+                {
+                    isUnlocked = true;
+                    UnlockItem(item, $"스테이지 {i} 클리어");
+                    break;
+                }
+            }
+
+            if (!isUnlocked)
+            {
+                LockItem(item);
+            }
+        }
+        Debug.Log("=== Item State Initialization Complete ===");
+    }
+    
+    void UnlockItem(ItemLockState item, string reason = "")
+    {
+        Debug.Log($"Unlocking item: {item.gameObject.name} (Reason: {reason})");
+        item.SetLockState(false);
+    }
+    
+    void LockItem(ItemLockState item)
+    {
+        Debug.Log($"Locking item: {item.gameObject.name}");
+        item.SetLockState(true);
     }
     
     void LoadStageProgress()
     {
+        Debug.Log("=== Loading Stage Progress ===");
         for (int i = 0; i < stages.Count; i++)
         {
-            stageCleared[i] = PlayerPrefs.GetInt("Stage_" + i + "_Cleared", 0) == 1;
-            
-            // 스테이지 클리어 시 아이템 해금
-            if (stageCleared[i] && stages[i].unlockedItemPrefab != null)
-            {
-                UnlockItem(stages[i].unlockedItemPrefab);
-            }
+            stageCleared[i] = PlayerPrefs.GetInt($"Stage_{i}_Cleared", 0) == 1;
+            Debug.Log($"Stage {i}: {(stageCleared[i] ? "Cleared" : "Not Cleared")}");
         }
+    }
+    
+    void ResetAllProgress()
+    {
+        Debug.Log("=== Resetting All Progress ===");
+        // 모든 스테이지를 미클리어 상태로 초기화
+        for (int i = 0; i < stages.Count; i++)
+        {
+            stageCleared[i] = false;
+            PlayerPrefs.SetInt($"Stage_{i}_Cleared", 0);
+        }
+        
+        // 최초 실행 플래그 설정
+        PlayerPrefs.SetInt("IsFirstRun", 0);
+        PlayerPrefs.Save();
+        
+        Debug.Log("All progress has been reset to initial state");
+    }
+    
+    // 진행 상황을 수동으로 리셋하기 위한 public 메서드
+    public void ManuallyResetProgress()
+    {
+        ResetAllProgress();
+        InitializeItemStates();
     }
     
     void SaveStageProgress()
     {
+        Debug.Log("=== Saving Stage Progress ===");
         for (int i = 0; i < stageCleared.Length; i++)
         {
-            PlayerPrefs.SetInt("Stage_" + i + "_Cleared", stageCleared[i] ? 1 : 0);
+            PlayerPrefs.SetInt($"Stage_{i}_Cleared", stageCleared[i] ? 1 : 0);
+            Debug.Log($"Saving Stage {i}: {(stageCleared[i] ? "Cleared" : "Not Cleared")}");
         }
         PlayerPrefs.Save();
     }
     
     public void OnEnemyDefeated()
     {
-        // 현재 스테이지 클리어 처리
+        Debug.Log($"=== Enemy Defeated in Stage {currentStageIndex} ===");
+        
         if (!stageCleared[currentStageIndex])
         {
+            Debug.Log($"First time clearing stage {currentStageIndex}");
             stageCleared[currentStageIndex] = true;
             SaveStageProgress();
             
-            // 아이템 해금
-            if (stages[currentStageIndex].unlockedItemPrefab != null)
-            {
-                UnlockItem(stages[currentStageIndex].unlockedItemPrefab);
-            }
+            // 해당 스테이지의 아이템 해금
+            UnlockStageItem(currentStageIndex);
         }
         
         // 다음 스테이지로 진행
         if (currentStageIndex < stages.Count - 1)
         {
             currentStageIndex++;
+            Debug.Log($"Advancing to stage {currentStageIndex}");
             SpawnCurrentStageEnemy();
         }
         else
         {
-            Debug.Log("모든 스테이지 클리어!");
-            // TODO: 엔딩 또는 게임 클리어 처리
+            Debug.Log("=== All Stages Cleared! ===");
+        }
+    }
+    
+    void UnlockStageItem(int stageIndex)
+    {
+        if (stages[stageIndex].unlockedItemPrefab == null)
+        {
+            Debug.Log($"No item to unlock for stage {stageIndex}");
+            return;
+        }
+
+        if (itemPanel == null)
+        {
+            Debug.LogError("ItemPanel이 설정되지 않았습니다.");
+            return;
+        }
+
+        Debug.Log($"Attempting to unlock item for stage {stageIndex}");
+        var items = itemPanel.GetComponentsInChildren<ItemLockState>(true);
+        string targetItemName = stages[stageIndex].unlockedItemPrefab.name;
+        bool found = false;
+
+        foreach (var item in items)
+        {
+            if (item.gameObject.name.Contains(targetItemName))
+            {
+                UnlockItem(item, $"스테이지 {stageIndex} 클리어 보상");
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+        {
+            Debug.LogWarning($"Could not find item matching {targetItemName} to unlock");
         }
     }
     
@@ -95,14 +228,12 @@ public class StageManager : MonoBehaviour
         
         if (currentStageIndex < stages.Count && stages[currentStageIndex].enemyPrefab != null)
         {
-            // UI 요소로 생성
+            Debug.Log($"Spawning enemy for stage {currentStageIndex}");
             currentEnemy = Instantiate(stages[currentStageIndex].enemyPrefab, enemySpawnPoint.transform);
             
-            // RectTransform 위치 설정
             RectTransform rectTransform = currentEnemy.GetComponent<RectTransform>();
             if (rectTransform != null)
             {
-                // 우측 하단 기준으로 설정
                 rectTransform.anchorMin = new Vector2(1, 0);
                 rectTransform.anchorMax = new Vector2(1, 0);
                 rectTransform.pivot = new Vector2(0.5f, 0.5f);
@@ -111,28 +242,11 @@ public class StageManager : MonoBehaviour
                 rectTransform.localScale = Vector3.one;
             }
             
-            // CombatManager에 새로운 적 등록
-            if (combatManager != null)
+            var enemyCharacter = currentEnemy.GetComponent<EnemyCharacter>();
+            if (enemyCharacter != null && combatManager != null)
             {
-                var enemyCharacter = currentEnemy.GetComponent<EnemyCharacter>();
-                if (enemyCharacter != null)
-                {
-                    combatManager.SetEnemy(enemyCharacter);
-                }
+                combatManager.SetEnemy(enemyCharacter);
             }
-            
-            Debug.Log($"스테이지 {currentStageIndex + 1} 시작: {stages[currentStageIndex].enemyRank}");
-        }
-    }
-    
-    void UnlockItem(GameObject itemPrefab)
-    {
-        // 아이템 프리팹을 ItemPanel에 추가
-        var itemPanel = GameObject.Find("ItemPanel");
-        if (itemPanel != null)
-        {
-            var newItem = Instantiate(itemPrefab, itemPanel.transform);
-            Debug.Log($"새 아이템 해금: {itemPrefab.name}");
         }
     }
     
