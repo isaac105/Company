@@ -11,6 +11,7 @@ public class StageManager : MonoBehaviour
         public string enemyRank;
         public GameObject enemyPrefab;
         public GameObject unlockedItemPrefab;
+        public Sprite backgroundImage; // 스테이지 배경 이미지
         
         [Header("적 캐릭터 이미지")]
         public Sprite[] poseSprites;    // 기본 포즈 (01, 02)
@@ -24,7 +25,8 @@ public class StageManager : MonoBehaviour
     public Transform enemySpawnPoint;
     
     [Header("UI 참조")]
-    [SerializeField] private GameObject itemPanel; // Inspector에서 할당할 수 있도록 추가
+    [SerializeField] private GameObject itemPanel;
+    [SerializeField] private Image backgroundImage; // 배경 이미지 UI 참조
     
     [Header("현재 스테이지 정보")]
     [SerializeField] private int currentStageIndex = 0;
@@ -67,6 +69,34 @@ public class StageManager : MonoBehaviour
             bgmManager.PlayBGM("Normal");
         }
         
+        // 배경 이미지 컴포넌트 찾기 (없으면 생성)
+        if (backgroundImage == null)
+        {
+            var gameArea = GameObject.Find("GameArea");
+            if (gameArea != null)
+            {
+                var bgImageObj = gameArea.transform.Find("BackgroundImage");
+                if (bgImageObj != null)
+                {
+                    backgroundImage = bgImageObj.GetComponent<Image>();
+                    if (backgroundImage != null)
+                    {
+                        // 배경 이미지를 GameArea의 첫 번째 자식으로 설정
+                        backgroundImage.transform.SetSiblingIndex(0);
+                        // 배경 이미지가 전체 GameArea를 채우도록 설정
+                        var rectTransform = backgroundImage.GetComponent<RectTransform>();
+                        if (rectTransform != null)
+                        {
+                            rectTransform.anchorMin = Vector2.zero;
+                            rectTransform.anchorMax = Vector2.one;
+                            rectTransform.offsetMin = Vector2.zero;
+                            rectTransform.offsetMax = Vector2.zero;
+                        }
+                    }
+                }
+            }
+        }
+        
         if (!isInitialized)
         {
             InitializeItemStates();
@@ -74,6 +104,7 @@ public class StageManager : MonoBehaviour
             Debug.Log("StageManager 초기화 완료");
         }
         
+        UpdateBackground();
         SpawnCurrentStageEnemy();
     }
     
@@ -154,23 +185,20 @@ public class StageManager : MonoBehaviour
         Debug.Log("게임을 처음부터 다시 시작합니다.");
         currentStageIndex = 0;
         
-        // 현재 적 제거
         if (currentEnemy != null)
         {
             Destroy(currentEnemy);
             currentEnemy = null;
         }
         
-        // 첫 스테이지 적 생성
+        UpdateBackground(); // 배경 업데이트
         SpawnCurrentStageEnemy();
         
-        // 아이템 패널 활성화 (필요한 경우)
         if (itemPanel != null)
         {
             itemPanel.SetActive(true);
         }
         
-        // UI 업데이트
         if (combatManager != null)
         {
             combatManager.SetState(CombatManager.State.ItemSelect);
@@ -205,15 +233,14 @@ public class StageManager : MonoBehaviour
             stageCleared[currentStageIndex] = true;
             SaveStageProgress();
             
-            // 해당 스테이지의 아이템 해금
             UnlockStageItem(currentStageIndex);
         }
         
-        // 다음 스테이지로 진행
         if (currentStageIndex < stages.Count - 1)
         {
             currentStageIndex++;
             Debug.Log($"Advancing to stage {currentStageIndex}");
+            UpdateBackground(); // 스테이지 변경 시 배경 업데이트
             SpawnCurrentStageEnemy();
         }
         else
@@ -367,5 +394,28 @@ public class StageManager : MonoBehaviour
             return stages[currentStageIndex].enemyRank;
         }
         return "Unknown";
+    }
+    
+    // 배경 업데이트 함수
+    private void UpdateBackground()
+    {
+        if (backgroundImage != null && currentStageIndex < stages.Count)
+        {
+            StageData currentStage = stages[currentStageIndex];
+            if (currentStage.backgroundImage != null)
+            {
+                backgroundImage.sprite = currentStage.backgroundImage;
+                backgroundImage.color = Color.white; // 이미지가 보이도록 알파값 설정
+                Debug.Log($"배경 이미지 변경: {currentStage.stageName}, Sprite: {currentStage.backgroundImage.name}");
+            }
+            else
+            {
+                Debug.LogWarning($"스테이지 {currentStageIndex}의 배경 이미지가 설정되지 않았습니다!");
+            }
+        }
+        else
+        {
+            Debug.LogError("배경 이미지 컴포넌트를 찾을 수 없거나 스테이지 인덱스가 범위를 벗어났습니다!");
+        }
     }
 } 
