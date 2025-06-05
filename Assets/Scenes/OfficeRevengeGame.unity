@@ -1229,11 +1229,17 @@ MonoBehaviour:
   itemPanel: {fileID: 1301466689}
   attackTimingPanel: {fileID: 1252905761}
   defenseTimingPanel: {fileID: 525473686}
+  gameCanvas: {fileID: 862575374}
   playerCharacter: {fileID: 574634053}
   enemyCharacter: {fileID: 1961296010}
   playerHpText: {fileID: 1175120354}
   enemyHpText: {fileID: 1332465814}
   stageText: {fileID: 1825209098}
+  damageTextPrefab: {fileID: 1234567890123456789, guid: 89286923617b5463c8c3345f6693d799, type: 3}
+  damageTextDuration: 1
+  damageTextRiseDistance: 100
+  itemFlyDuration: 0.5
+  itemArcHeight: 200
   attackTimingSystem: {fileID: 1252905765}
   defenseTimingSystem: {fileID: 525473690}
   stageManager: {fileID: 1673489258}

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class CombatManager : MonoBehaviour
 {
@@ -7,6 +8,7 @@ public class CombatManager : MonoBehaviour
     public GameObject itemPanel;
     public GameObject attackTimingPanel;
     public GameObject defenseTimingPanel;
+    public Canvas gameCanvas; // UI Canvas 참조 추가
     
     [Header("캐릭터")]
     public PlayerCharacter playerCharacter;
@@ -16,6 +18,15 @@ public class CombatManager : MonoBehaviour
     public Text playerHpText;
     public Text enemyHpText;
     public Text stageText;
+    
+    [Header("전투 이펙트")]
+    public GameObject damageTextPrefab;  // 데미지 텍스트 프리팹
+    public float damageTextDuration = 1f;  // 데미지 텍스트 표시 시간
+    public float damageTextRiseDistance = 100f;  // 데미지 텍스트가 올라가는 거리
+    
+    [Header("아이템 날라가기 효과")]
+    public float itemFlyDuration = 0.5f;  // 아이템이 날아가는 시간
+    public float itemArcHeight = 200f;  // 포물선 높이
     
     [Header("타이밍 시스템")]
     public AttackTimingSystem attackTimingSystem;
@@ -141,85 +152,190 @@ public class CombatManager : MonoBehaviour
         {
             playerDamage *= selectedItem.DamageCoefficient;
             
-            // 연속공격 효과 확인
-            if (selectedItem.HasEffect(ItemEffectType.DoubleAttack))
-            {
-                int attackCount = (int)selectedItem.GetEffectValue(ItemEffectType.DoubleAttack);
-                ExecuteMultipleAttacks(playerDamage, attackCount);
-                return;
-            }
-            
-            // 다른 특수 효과 적용
-            selectedItem.ApplyItemEffects(playerCharacter, enemyCharacter, this);
-        }
-            
-        enemyCharacter.TakeDamage(playerDamage);
-        Debug.Log("플레이어 공격! " + enemyCharacter.EnemyName + "에게 데미지: " + playerDamage);
-        
-        // 플레이어 턴 종료 - 적의 일회성 효과 리셋
-        enemyCharacter.EndTurn();
-        
-        if (enemyCharacter.HP <= 0)
-        {
-            Debug.Log(enemyCharacter.EnemyName + " 사망! 승리!");
-            if (stageManager != null)
-            {
-                stageManager.OnEnemyDefeated();
-            }
-            SetState(State.ItemSelect);
-        }
-        else
-        {
-            SetState(State.DefenseTiming);
+            // 아이템 날라가기 효과 시작
+            StartCoroutine(FlyItemToEnemy(selectedItem.gameObject, () => {
+                // 연속공격 효과 확인
+                if (selectedItem.HasEffect(ItemEffectType.DoubleAttack))
+                {
+                    int attackCount = (int)selectedItem.GetEffectValue(ItemEffectType.DoubleAttack);
+                    ExecuteMultipleAttacks(playerDamage, attackCount);
+                    return;
+                }
+                
+                // 다른 특수 효과 적용
+                selectedItem.ApplyItemEffects(playerCharacter, enemyCharacter, this);
+                
+                // 데미지 적용 및 표시
+                enemyCharacter.TakeDamage(playerDamage);
+                ShowDamageText(playerDamage, enemyCharacter.transform.position);
+                Debug.Log("플레이어 공격! " + enemyCharacter.EnemyName + "에게 데미지: " + playerDamage);
+                
+                // 플레이어 턴 종료 - 적의 일회성 효과 리셋
+                enemyCharacter.EndTurn();
+                
+                if (enemyCharacter.HP <= 0)
+                {
+                    Debug.Log(enemyCharacter.EnemyName + " 사망! 승리!");
+                    if (stageManager != null)
+                    {
+                        stageManager.OnEnemyDefeated();
+                    }
+                    SetState(State.ItemSelect);
+                }
+                else
+                {
+                    SetState(State.DefenseTiming);
+                }
+            }));
         }
     }
     
-    // 연속공격 처리 메서드
+    // 아이템 날라가기 효과
+    IEnumerator FlyItemToEnemy(GameObject item, System.Action onComplete)
+    {
+        if (gameCanvas == null)
+        {
+            Debug.LogError("게임 캔버스가 설정되지 않았습니다!");
+            onComplete?.Invoke();
+            yield break;
+        }
+
+        // 아이템의 복사본 생성
+        GameObject flyingItem = Instantiate(item, gameCanvas.transform);
+        RectTransform flyingRect = flyingItem.GetComponent<RectTransform>();
+        
+        // 불필요한 컴포넌트 제거
+        Destroy(flyingItem.GetComponent<Button>());
+        Destroy(flyingItem.GetComponent<ItemLockState>());
+        
+        // 잠금 이미지 제거
+        Transform lockImage = flyingItem.transform.Find("LockImage");
+        if (lockImage != null)
+        {
+            Destroy(lockImage.gameObject);
+        }
+        
+        // 원본 아이템의 크기와 이미지 설정 복사
+        RectTransform originalRect = item.GetComponent<RectTransform>();
+        flyingRect.sizeDelta = originalRect.sizeDelta;
+        
+        Image flyingImage = flyingItem.GetComponent<Image>();
+        Image originalImage = item.GetComponent<Image>();
+        if (flyingImage && originalImage)
+        {
+            flyingImage.sprite = originalImage.sprite;
+            flyingImage.color = originalImage.color;
+        }
+
+        // 시작 위치 (아이템 패널의 현재 위치)
+        Vector2 startPos = playerCharacter.transform.position;
+        flyingRect.position = startPos;
+
+        // 목표 위치 (적 캐릭터의 위치)
+        Vector2 targetPos = enemyCharacter.transform.position;
+
+        Debug.Log($"Flying item from {startPos} to {targetPos}");
+        
+        float elapsed = 0f;
+        Vector2 originalScale = flyingRect.localScale;
+        
+        while (elapsed < itemFlyDuration)
+        {
+            elapsed += Time.deltaTime;
+            float normalizedTime = elapsed / itemFlyDuration;
+            
+            // 포물선 운동 계산
+            Vector2 currentPos = Vector2.Lerp(startPos, targetPos, normalizedTime);
+            float height = Mathf.Sin(normalizedTime * Mathf.PI) * itemArcHeight;
+            currentPos.y += height;
+            
+            // 위치 업데이트
+            flyingRect.position = currentPos;
+            
+            // 크기 약간 줄이기
+            float scale = Mathf.Lerp(1f, 0.5f, normalizedTime);
+            flyingRect.localScale = originalScale * scale;
+            
+            yield return null;
+        }
+        
+        // 효과 종료 및 정리
+        Destroy(flyingItem);
+        onComplete?.Invoke();
+    }
+    
+    // 데미지 텍스트 표시
+    void ShowDamageText(float damage, Vector3 position)
+    {
+        if (damageTextPrefab == null || gameCanvas == null) return;
+        
+        // 데미지 텍스트 생성
+        GameObject damageTextObj = Instantiate(damageTextPrefab, gameCanvas.transform);
+        RectTransform rectTransform = damageTextObj.GetComponent<RectTransform>();
+        
+        // 월드 위치를 스크린 위치로 설정
+        rectTransform.position = position;
+        
+        // 텍스트 설정
+        Text damageText = damageTextObj.GetComponent<Text>();
+        if (damageText != null)
+        {
+            damageText.text = $"-{damage:F0}";
+            StartCoroutine(AnimateDamageText(rectTransform));
+        }
+    }
+    
+    // 데미지 텍스트 애니메이션
+    IEnumerator AnimateDamageText(RectTransform textTransform)
+    {
+        float elapsed = 0f;
+        Vector3 startPos = textTransform.position;  // position 사용
+        Color startColor = textTransform.GetComponent<Text>().color;
+        
+        while (elapsed < damageTextDuration)
+        {
+            elapsed += Time.deltaTime;
+            float normalizedTime = elapsed / damageTextDuration;
+            
+            // 위로 올라가면서 페이드아웃
+            Vector3 currentPos = startPos + Vector3.up * (damageTextRiseDistance * normalizedTime);
+            textTransform.position = currentPos;  // position 사용
+            
+            // 크기도 약간 커지도록
+            float scale = Mathf.Lerp(1f, 1.2f, normalizedTime);
+            textTransform.localScale = Vector3.one * scale;
+            
+            Color currentColor = startColor;
+            currentColor.a = 1 - normalizedTime;
+            textTransform.GetComponent<Text>().color = currentColor;
+            
+            yield return null;
+        }
+        
+        Destroy(textTransform.gameObject);
+    }
+    
+    // 연속 공격 처리
     void ExecuteMultipleAttacks(float baseDamage, int attackCount)
     {
-        Debug.Log("=== 연속공격 시작! 총 " + attackCount + "회 공격 ===");
-        
-        // 다른 특수 효과들 먼저 적용 (방어 봉인 등)
-        if (selectedItem != null)
-        {
-            selectedItem.ApplyItemEffects(playerCharacter, enemyCharacter, this);
-        }
-        
-        int successfulAttacks = 0;
-        float totalDamage = 0f;
-        
+        StartCoroutine(MultipleAttackSequence(baseDamage, attackCount));
+    }
+    
+    IEnumerator MultipleAttackSequence(float baseDamage, int attackCount)
+    {
         for (int i = 0; i < attackCount; i++)
         {
-            Debug.Log("--- 공격 " + (i + 1) + "/" + attackCount + " ---");
+            if (enemyCharacter.HP <= 0) break;
             
-            // 각 공격마다 적이 개별적으로 방어 시도
-            if (enemyCharacter.TryDefense())
-            {
-                Debug.Log(enemyCharacter.EnemyName + "이 " + (i + 1) + "번째 공격을 방어했습니다! (데미지: 0)");
-            }
-            else
-            {
-                float finalDamage = baseDamage / enemyCharacter.DefenseCoefficient;
-                enemyCharacter.HP -= finalDamage;
-                totalDamage += finalDamage;
-                successfulAttacks++;
-                
-                Debug.Log(enemyCharacter.EnemyName + "이 " + (i + 1) + "번째 공격으로 데미지: " + finalDamage + " - 현재 HP: " + enemyCharacter.HP + "/" + enemyCharacter.MaxHP);
-            }
+            // 데미지 적용 및 표시
+            enemyCharacter.TakeDamage(baseDamage);
+            ShowDamageText(baseDamage, enemyCharacter.transform.position);
+            Debug.Log($"연속 공격 {i + 1}번째! 데미지: {baseDamage}");
             
-            // 적이 사망했으면 연속공격 중단
-            if (enemyCharacter.HP <= 0)
-            {
-                Debug.Log(enemyCharacter.EnemyName + " 사망! " + (i + 1) + "번째 공격에서 쓰러졌습니다!");
-                break;
-            }
+            yield return new WaitForSeconds(0.5f); // 연속 공격 간 딜레이
         }
         
-        Debug.Log("=== 연속공격 완료! 성공한 공격: " + successfulAttacks + "/" + attackCount + ", 총 데미지: " + totalDamage + " ===");
-        
-        // 플레이어 턴 종료 - 적의 일회성 효과 리셋
-        enemyCharacter.EndTurn();
-        
+        // 전투 상태 확인 및 변경
         if (enemyCharacter.HP <= 0)
         {
             Debug.Log(enemyCharacter.EnemyName + " 사망! 승리!");
