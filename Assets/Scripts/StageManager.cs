@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class StageManager : MonoBehaviour
 {
@@ -10,6 +11,12 @@ public class StageManager : MonoBehaviour
         public string enemyRank;
         public GameObject enemyPrefab;
         public GameObject unlockedItemPrefab;
+        
+        [Header("적 캐릭터 이미지")]
+        public Sprite[] poseSprites;    // 기본 포즈 (01, 02)
+        public Sprite[] angrySprites;   // 화난 포즈 (01, 02)
+        public Sprite dodgeSprite;      // 회피 포즈
+        public Sprite[] throwSprites;   // 던지기 포즈 (01, 02)
     }
     
     [Header("스테이지 설정")]
@@ -243,9 +250,59 @@ public class StageManager : MonoBehaviour
             }
             
             var enemyCharacter = currentEnemy.GetComponent<EnemyCharacter>();
-            if (enemyCharacter != null && combatManager != null)
+            if (enemyCharacter != null)
             {
-                combatManager.SetEnemy(enemyCharacter);
+                // CharacterImageManager 설정
+                var imageManager = currentEnemy.GetComponent<CharacterImageManager>();
+                if (imageManager == null)
+                {
+                    imageManager = currentEnemy.AddComponent<CharacterImageManager>();
+                }
+
+                // 이미지 컴포넌트 설정
+                var image = currentEnemy.GetComponent<Image>();
+                if (image == null)
+                {
+                    image = currentEnemy.AddComponent<Image>();
+                }
+
+                // 스테이지 데이터에서 이미지 설정
+                var stageData = stages[currentStageIndex];
+                if (imageManager != null)
+                {
+                    var serializedObject = new UnityEditor.SerializedObject(imageManager);
+                    
+                    var poseSpritesProperty = serializedObject.FindProperty("poseSprites");
+                    poseSpritesProperty.arraySize = stageData.poseSprites != null ? stageData.poseSprites.Length : 0;
+                    for (int i = 0; i < poseSpritesProperty.arraySize; i++)
+                    {
+                        poseSpritesProperty.GetArrayElementAtIndex(i).objectReferenceValue = stageData.poseSprites[i];
+                    }
+                    
+                    var angrySpritesProperty = serializedObject.FindProperty("angrySprites");
+                    angrySpritesProperty.arraySize = stageData.angrySprites != null ? stageData.angrySprites.Length : 0;
+                    for (int i = 0; i < angrySpritesProperty.arraySize; i++)
+                    {
+                        angrySpritesProperty.GetArrayElementAtIndex(i).objectReferenceValue = stageData.angrySprites[i];
+                    }
+                    
+                    var dodgeSpriteProperty = serializedObject.FindProperty("dodgeSprite");
+                    dodgeSpriteProperty.objectReferenceValue = stageData.dodgeSprite;
+                    
+                    var throwSpritesProperty = serializedObject.FindProperty("throwSprites");
+                    throwSpritesProperty.arraySize = stageData.throwSprites != null ? stageData.throwSprites.Length : 0;
+                    for (int i = 0; i < throwSpritesProperty.arraySize; i++)
+                    {
+                        throwSpritesProperty.GetArrayElementAtIndex(i).objectReferenceValue = stageData.throwSprites[i];
+                    }
+                    
+                    serializedObject.ApplyModifiedProperties();
+                }
+
+                if (combatManager != null)
+                {
+                    combatManager.SetEnemy(enemyCharacter);
+                }
             }
         }
     }

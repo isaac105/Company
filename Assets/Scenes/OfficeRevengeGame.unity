@@ -973,6 +973,7 @@ GameObject:
   - component: {fileID: 574634051}
   - component: {fileID: 574634053}
   - component: {fileID: 574634054}
+  - component: {fileID: 574634055}
   m_Layer: 0
   m_Name: PlayerCharacter
   m_TagString: Untagged
@@ -1055,6 +1056,7 @@ MonoBehaviour:
   defenseCoefficient: 1
   currentItem: {fileID: 0}
   maxHp: 0
+  imageManager: {fileID: 0}
   currentItemDebugInfo: None
 --- !u!65 &574634054
 BoxCollider:
@@ -1077,6 +1079,29 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &574634055
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 574634049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52e2be36b96794d0d9d7cb623753f454, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  characterImage: {fileID: 0}
+  poseSprites:
+  - {fileID: -3456501521391519884, guid: bababb3acf53e45d5a6a6c4a6b6bb93f, type: 3}
+  - {fileID: 6292784566371672676, guid: 31095672c5ef94051abae9a9218dd6c6, type: 3}
+  angrySprites:
+  - {fileID: 4593161270468044220, guid: a7326d42036c8424eb5def9ef0ef417e, type: 3}
+  - {fileID: -6089067459174337202, guid: f1ae2c7d1be234020b4ebe6bf19eafe5, type: 3}
+  dodgeSprite: {fileID: 5952267841234311049, guid: c0c0695b2bf274825802677625c25d79, type: 3}
+  throwSprites:
+  - {fileID: 5329042571044565658, guid: 188067e7e8f624d7c87b2c2e4ae1bde9, type: 3}
+  - {fileID: -8139390094082362279, guid: 60b877343315545729d6008da143c94b, type: 3}
 --- !u!1 &581765930
 GameObject:
   m_ObjectHideFlags: 0
@@ -3163,22 +3188,72 @@ MonoBehaviour:
     enemyRank: "\uB300\uB9AC"
     enemyPrefab: {fileID: 8227372067973445977, guid: 9244decdeb8da4413a8bc00c1e6413ea, type: 3}
     unlockedItemPrefab: {fileID: 731199252}
+    poseSprites:
+    - {fileID: 7846180666686889462, guid: ea1b0c8c3731c4170a0d937faf5503e7, type: 3}
+    - {fileID: 8785132257389956217, guid: 2db497cff033f4f7abfbcb01f250552d, type: 3}
+    angrySprites:
+    - {fileID: 8296495366358608261, guid: 3ecba662df7e54d768305cc5fd0ffd57, type: 3}
+    - {fileID: 6351748858201202405, guid: 773f64afb51b849b3bdc60ab5c854de8, type: 3}
+    dodgeSprite: {fileID: -5389693302480014477, guid: 615f85a07b88c494db625a7cd08b5069, type: 3}
+    throwSprites:
+    - {fileID: -1077021928399019788, guid: 6273cf462c8564bb6a83df8e3852a46f, type: 3}
+    - {fileID: -5714375062312406978, guid: cf0e958cb29c64dc98fb4fde7f4fd93c, type: 3}
   - stageName: Stage 2
     enemyRank: "\uACFC\uC7A5"
     enemyPrefab: {fileID: 2428679871686257419, guid: 141a67f42e54c498b863639e7522735f, type: 3}
     unlockedItemPrefab: {fileID: 908248968}
+    poseSprites:
+    - {fileID: 3862220251446714025, guid: 1d0bb704598a841fe9972ce7a7c2322f, type: 3}
+    - {fileID: -4620556538911856047, guid: 65c207ecea7d84efda9e573038ff557f, type: 3}
+    angrySprites:
+    - {fileID: 5209840264727095583, guid: 1377238b16c614d7b9ca94a6767aa170, type: 3}
+    - {fileID: 8964599992408189763, guid: c45406aa479b1456f837e34bee326b84, type: 3}
+    dodgeSprite: {fileID: 8126114624647292878, guid: 769be64ab89e24d91ac9187427094eb6, type: 3}
+    throwSprites:
+    - {fileID: 6738452234386650762, guid: 75e457cb20d6a40579c5583be88dfe44, type: 3}
+    - {fileID: -8050641133490355013, guid: 9fbbc55b750ea496dacefa89ba0ea768, type: 3}
   - stageName: Stage 3
     enemyRank: "\uBD80\uC7A5"
     enemyPrefab: {fileID: 5882187382232122843, guid: c92a5429ed1554b9f9c86da5dc52a421, type: 3}
     unlockedItemPrefab: {fileID: 891302108}
+    poseSprites:
+    - {fileID: 2508071314530843540, guid: 03418cf0af0a54dd09db8e1bff479298, type: 3}
+    - {fileID: 2871751541495463124, guid: d89ce139a75ef4233a72bbb76fd9339b, type: 3}
+    angrySprites:
+    - {fileID: 3806713382745359237, guid: da2e817ac548c4cc38bf5f51d4f5c784, type: 3}
+    - {fileID: 4728483828599177193, guid: 6bcef6fe0e7484cc698e0afb1834cdc7, type: 3}
+    dodgeSprite: {fileID: -8656896027812970429, guid: 2f8526203e7d642e5882fb3e0ad7f1cc, type: 3}
+    throwSprites:
+    - {fileID: -8051222048927118131, guid: c4afe5a6ee3984172b8accbacd8c40b7, type: 3}
+    - {fileID: -7567809674836604406, guid: becc6b151692b4e68838a776692cade2, type: 3}
   - stageName: Stage 4
     enemyRank: "\uC774\uC0AC"
     enemyPrefab: {fileID: 5975087016144476009, guid: c9112c878424847ab83db6cc75df194d, type: 3}
     unlockedItemPrefab: {fileID: 1286700403}
+    poseSprites:
+    - {fileID: 1142639199612723332, guid: d2ae7e265a926496db04a0bac1fcbbb7, type: 3}
+    - {fileID: -3792709794886753604, guid: be9a7e7237f364308bea25282e1c7984, type: 3}
+    angrySprites:
+    - {fileID: 390114640798397416, guid: c71bae33855c24387a544cdf4f846e83, type: 3}
+    - {fileID: -7538134524985856343, guid: 3aa7e95b5fe3d446e929d0b108853b49, type: 3}
+    dodgeSprite: {fileID: -7800219326674015103, guid: d4cc6a1aefa48435a9aab932d247cf0b, type: 3}
+    throwSprites:
+    - {fileID: -8983801028275401346, guid: 976da641782834a80aca5b4e4ecc2afd, type: 3}
+    - {fileID: 2249017289613429866, guid: 2654641a502d34fd69462aff2791927d, type: 3}
   - stageName: Stage 5
     enemyRank: "\uC0AC\uC7A5"
     enemyPrefab: {fileID: 267962941121110118, guid: 7b829c43ed3ca447ea325c39bb8d495c, type: 3}
     unlockedItemPrefab: {fileID: 0}
+    poseSprites:
+    - {fileID: -1235897952062706656, guid: 40fea3e547f32430192c39c72d1c684d, type: 3}
+    - {fileID: 4336093135891361093, guid: 9b86402b6e159483e8f5037613e76674, type: 3}
+    angrySprites:
+    - {fileID: -4261835685607808902, guid: 3964b992f3db14cccad17cffa8a52290, type: 3}
+    - {fileID: 1697778764948799605, guid: 9e7ab40cfa28b4097884313abc932d9a, type: 3}
+    dodgeSprite: {fileID: -5549313842700173963, guid: 3c5f6f7e332804dbba2f01bfee73c7ee, type: 3}
+    throwSprites:
+    - {fileID: -9059299589139991710, guid: aee0028dffa7e4b0c9e0dd59b4b5cef6, type: 3}
+    - {fileID: -4350608010131818597, guid: f3315ea7290a64cd4910a597cd8dc402, type: 3}
   enemySpawnPoint: {fileID: 323685042}
   itemPanel: {fileID: 1301466689}
   currentStageIndex: 0
@@ -4070,6 +4145,7 @@ MonoBehaviour:
   baseDefenseChance: 0.3
   isDefenseBlocked: 0
   defenseReduction: 0
+  imageManager: {fileID: 0}
   currentItemDebugInfo: None
   lastActionWasDefense: 0
 --- !u!114 &1961296010
