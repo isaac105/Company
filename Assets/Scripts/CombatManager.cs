@@ -50,10 +50,10 @@ public class CombatManager : MonoBehaviour
     void Start()
     {
         if (playerCharacter == null)
-            playerCharacter = FindObjectOfType<PlayerCharacter>();
+            playerCharacter = FindFirstObjectByType<PlayerCharacter>();
             
         if (enemyCharacter == null)
-            enemyCharacter = FindObjectOfType<EnemyCharacter>();
+            enemyCharacter = FindFirstObjectByType<EnemyCharacter>();
             
         if (attackTimingSystem == null)
             attackTimingSystem = attackTimingPanel.GetComponent<AttackTimingSystem>();
@@ -62,7 +62,7 @@ public class CombatManager : MonoBehaviour
             defenseTimingSystem = defenseTimingPanel.GetComponent<DefenseTimingSystem>();
             
         if (stageManager == null)
-            stageManager = FindObjectOfType<StageManager>();
+            stageManager = FindFirstObjectByType<StageManager>();
             
         // 버튼 이벤트 등록
         if (attackButton != null)
@@ -215,10 +215,21 @@ public class CombatManager : MonoBehaviour
                 if (enemyCharacter.HP <= 0)
                 {
                     Debug.Log(enemyCharacter.EnemyName + " 사망! 승리!");
-                    if (stageManager != null)
+                    
+                    // CEO를 처치했는지 확인 (사장 랭크)
+                    if (enemyCharacter.EnemyRank == "사장")
+                    {
+                        var gameEndManager = FindAnyObjectByType<GameEndManager>();
+                        if (gameEndManager != null)
+                        {
+                            gameEndManager.ShowGameClear();
+                        }
+                    }
+                    else if (stageManager != null)
                     {
                         stageManager.OnEnemyDefeated();
                     }
+                    
                     SetState(State.ItemSelect);
                 }
                 else
@@ -408,10 +419,21 @@ public class CombatManager : MonoBehaviour
         if (enemyCharacter.HP <= 0)
         {
             Debug.Log(enemyCharacter.EnemyName + " 사망! 승리!");
-            if (stageManager != null)
+            
+            // CEO를 처치했는지 확인 (사장 랭크)
+            if (enemyCharacter.EnemyRank == "사장")
+            {
+                var gameEndManager = FindAnyObjectByType<GameEndManager>();
+                if (gameEndManager != null)
+                {
+                    gameEndManager.ShowGameClear();
+                }
+            }
+            else if (stageManager != null)
             {
                 stageManager.OnEnemyDefeated();
             }
+            
             SetState(State.ItemSelect);
         }
         else
@@ -492,7 +514,8 @@ public class CombatManager : MonoBehaviour
         }
     }
     
-    void ResetCombat()
+    // ResetCombat 메서드를 public으로 변경
+    public void ResetCombat()
     {
         if (playerCharacter != null)
         {

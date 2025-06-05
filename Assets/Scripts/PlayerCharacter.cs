@@ -176,7 +176,14 @@ public class PlayerCharacter : MonoBehaviour
     
     private void OnPlayerDeath()
     {
-        Debug.Log("플레이어가 사망했습니다!");
+        Debug.Log("플레이어 사망!");
+        
+        // 게임 오버 비디오 재생
+        var gameEndManager = FindAnyObjectByType<GameEndManager>();
+        if (gameEndManager != null)
+        {
+            gameEndManager.ShowGameOver();
+        }
     }
     
     public void ShowPlayerStatus()

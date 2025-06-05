@@ -41,7 +41,7 @@ public class StageManager : MonoBehaviour
         Debug.Log("StageManager Awake");
         stageCleared = new bool[stages.Count];
         ResetAllProgress();
-        
+
         // // 게임 최초 실행 여부 확인
         // bool isFirstRun = PlayerPrefs.GetInt("IsFirstRun", 1) == 1;
         // if (isFirstRun)
@@ -58,7 +58,7 @@ public class StageManager : MonoBehaviour
     void Start()
     {
         Debug.Log("StageManager Start");
-        combatManager = FindAnyObjectByType<CombatManager>();
+        combatManager = FindFirstObjectByType<CombatManager>();
         
         if (!isInitialized)
         {
@@ -132,21 +132,42 @@ public class StageManager : MonoBehaviour
         }
     }
     
-    void ResetAllProgress()
+    public void ResetAllProgress()
     {
-        Debug.Log("=== Resetting All Progress ===");
-        // 모든 스테이지를 미클리어 상태로 초기화
-        for (int i = 0; i < stages.Count; i++)
+        Debug.Log("모든 스테이지 진행 상황 초기화");
+        for (int i = 0; i < stageCleared.Length; i++)
         {
             stageCleared[i] = false;
-            PlayerPrefs.SetInt($"Stage_{i}_Cleared", 0);
+        }
+        // SaveStageProgress();
+    }
+    
+    public void RestartFromBeginning()
+    {
+        Debug.Log("게임을 처음부터 다시 시작합니다.");
+        currentStageIndex = 0;
+        
+        // 현재 적 제거
+        if (currentEnemy != null)
+        {
+            Destroy(currentEnemy);
+            currentEnemy = null;
         }
         
-        // 최초 실행 플래그 설정
-        PlayerPrefs.SetInt("IsFirstRun", 0);
-        PlayerPrefs.Save();
+        // 첫 스테이지 적 생성
+        SpawnCurrentStageEnemy();
         
-        Debug.Log("All progress has been reset to initial state");
+        // 아이템 패널 활성화 (필요한 경우)
+        if (itemPanel != null)
+        {
+            itemPanel.SetActive(true);
+        }
+        
+        // UI 업데이트
+        if (combatManager != null)
+        {
+            combatManager.SetState(CombatManager.State.ItemSelect);
+        }
     }
     
     // 진행 상황을 수동으로 리셋하기 위한 public 메서드
@@ -221,7 +242,7 @@ public class StageManager : MonoBehaviour
                 found = true;
                 
                 // ItemSelectionManager에 아이템 해금 알림
-                var itemSelectionManager = FindAnyObjectByType<ItemSelectionManager>();
+                var itemSelectionManager = FindFirstObjectByType<ItemSelectionManager>();
                 if (itemSelectionManager != null)
                 {
                     itemSelectionManager.OnItemUnlocked();
