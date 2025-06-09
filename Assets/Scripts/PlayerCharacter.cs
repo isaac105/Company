@@ -12,13 +12,23 @@ public class PlayerCharacter : MonoBehaviour
     [Header("최대 HP 설정")]
     [SerializeField] private float maxHp;
 
+    [Header("이미지 관리")]
+    [SerializeField] private CharacterImageManager imageManager;
+
     [Header("디버그 정보")]
     [SerializeField] private string currentItemDebugInfo = "None";
+
+    [Header("방어 시스템")]
+    private bool defenseSuccess = false;
 
     public float HP
     {
         get { return hp; }
-        set { hp = Mathf.Clamp(value, 0f, maxHp); }
+        set 
+        { 
+            hp = Mathf.Clamp(value, 0f, maxHp);
+            CheckHPState();
+        }
     }
 
     public float Damage
@@ -64,6 +74,12 @@ public class PlayerCharacter : MonoBehaviour
         set { defenseCoefficient = value; } 
     }
     
+    public bool DefenseSuccess
+    {
+        get { return defenseSuccess; }
+        set { defenseSuccess = value; }
+    }
+    
     void Start()
     {
         if (maxHp <= 0) maxHp = 100f;
@@ -71,13 +87,31 @@ public class PlayerCharacter : MonoBehaviour
         if (attackCoefficient <= 0) attackCoefficient = 1.0f;
         if (defenseCoefficient <= 0) defenseCoefficient = 1.0f;
         
+        if (imageManager == null)
+        {
+            imageManager = GetComponent<CharacterImageManager>();
+        }
+        
         Debug.Log("플레이어 캐릭터 초기화 완료: HP " + hp + "/" + maxHp);
     }
     
-    public void TakeDamage(float damage)
+    public bool TryTakeDamage(float damage)
     {
+        // 방어 성공 여부 확인
+        if (defenseSuccess)
+        {
+            Debug.Log("플레이어가 공격을 완전히 방어했습니다!");
+            return false;
+        }
+        
         float finalDamage = damage / defenseCoefficient;
         HP -= finalDamage;
+        
+        // 데미지를 받을 때 회피 모션 표시
+        if (imageManager != null)
+        {
+            imageManager.ShowDodgeSprite();
+        }
         
         Debug.Log("데미지 받음: " + finalDamage + " - 현재 HP: " + HP + "/" + maxHp);
         
@@ -85,10 +119,27 @@ public class PlayerCharacter : MonoBehaviour
         {
             OnPlayerDeath();
         }
+        
+        return true;
+    }
+    
+    private void CheckHPState()
+    {
+        if (imageManager != null)
+        {
+            // HP가 20% 이하일 때 화난 상태로 변경
+            imageManager.SetAngryState(HP <= maxHp * 0.2f);
+        }
     }
     
     public float CalculateAttackDamage()
     {
+        // 공격할 때 던지기 모션 표시
+        if (imageManager != null)
+        {
+            imageManager.ShowThrowAnimation();
+        }
+
         float itemDamageBonus = currentItem != null ? currentItem.DamageCoefficient : 1.0f;
         float finalDamage = damage * attackCoefficient * itemDamageBonus;
         
@@ -125,7 +176,14 @@ public class PlayerCharacter : MonoBehaviour
     
     private void OnPlayerDeath()
     {
-        Debug.Log("플레이어가 사망했습니다!");
+        Debug.Log("플레이어 사망!");
+        
+        // 게임 오버 비디오 재생
+        var gameEndManager = FindAnyObjectByType<GameEndManager>();
+        if (gameEndManager != null)
+        {
+            gameEndManager.ShowGameOver();
+        }
     }
     
     public void ShowPlayerStatus()

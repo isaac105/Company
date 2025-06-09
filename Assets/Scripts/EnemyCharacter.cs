@@ -21,6 +21,9 @@ public class EnemyCharacter : MonoBehaviour
     [SerializeField] protected bool isDefenseBlocked = false; // 방어 봉인 상태
     [SerializeField] protected float defenseReduction = 0f; // 방어 확률 감소량
 
+    [Header("이미지 관리")]
+    [SerializeField] protected CharacterImageManager imageManager;
+
     [Header("디버그 정보")]
     [SerializeField] private string currentItemDebugInfo = "None";
     [SerializeField] private bool lastActionWasDefense = false;
@@ -28,7 +31,11 @@ public class EnemyCharacter : MonoBehaviour
     public float HP
     {
         get { return hp; }
-        set { hp = Mathf.Clamp(value, 0f, maxHp); }
+        set 
+        { 
+            hp = Mathf.Clamp(value, 0f, maxHp);
+            CheckHPState();
+        }
     }
 
     public float Damage
@@ -116,6 +123,11 @@ public class EnemyCharacter : MonoBehaviour
         if (defenseCoefficient <= 0) defenseCoefficient = 1.0f;
         if (baseDefenseChance <= 0) baseDefenseChance = 0.3f; // 기본 30%
         
+        if (imageManager == null)
+        {
+            imageManager = GetComponent<CharacterImageManager>();
+        }
+        
         Debug.Log(enemyName + " (" + enemyRank + ") 초기화 완료: HP " + hp + "/" + maxHp + ", 방어 확률: " + (baseDefenseChance * 100) + "%");
     }
     
@@ -138,6 +150,10 @@ public class EnemyCharacter : MonoBehaviour
         if (defended)
         {
             lastActionWasDefense = true;
+            if (imageManager != null)
+            {
+                imageManager.ShowDodgeSprite();
+            }
             Debug.Log(enemyName + "이 방어에 성공했습니다! (확률: " + (finalDefenseChance * 100).ToString("F1") + "%)");
         }
         else
@@ -148,18 +164,24 @@ public class EnemyCharacter : MonoBehaviour
         return defended;
     }
     
-    public virtual void TakeDamage(float damage)
+    public virtual bool TryTakeDamage(float damage)
     {
         // 방어 시도
         if (TryDefense())
         {
-            Debug.Log(enemyName + "이 공격을 완전히 방어했습니다! (데미지: 0)");
-            return;
+            Debug.Log(enemyName + "이 공격을 완전히 방어했습니다!");
+            return false;
         }
         
         // 방어 실패 시 데미지 계산
         float finalDamage = damage / defenseCoefficient;
         HP -= finalDamage;
+        
+        // 데미지를 받을 때 회피 모션 표시
+        if (imageManager != null)
+        {
+            imageManager.ShowDodgeSprite();
+        }
         
         Debug.Log(enemyName + "이 데미지 받음: " + finalDamage + " - 현재 HP: " + HP + "/" + maxHp);
         
@@ -167,6 +189,8 @@ public class EnemyCharacter : MonoBehaviour
         {
             OnEnemyDeath();
         }
+        
+        return true;
     }
     
     // 아이템 효과로 방어 봉인
@@ -255,8 +279,23 @@ public class EnemyCharacter : MonoBehaviour
         }
     }
 
+    private void CheckHPState()
+    {
+        if (imageManager != null)
+        {
+            // HP가 20% 이하일 때 화난 상태로 변경
+            imageManager.SetAngryState(HP <= maxHp * 0.2f);
+        }
+    }
+
     public virtual float CalculateAttackDamage()
     {
+        // 공격할 때 던지기 모션 표시
+        if (imageManager != null)
+        {
+            imageManager.ShowThrowAnimation();
+        }
+
         float itemDamageBonus = currentItem != null ? currentItem.DamageCoefficient : 1.0f;
         float finalDamage = damage * attackCoefficient * itemDamageBonus;
         

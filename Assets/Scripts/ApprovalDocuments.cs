@@ -17,7 +17,7 @@ public class ApprovalDocuments : Item
         AddEffect(ItemEffectType.ReduceEnemyDefense, 0.3f, "방어 확률 30% 감소");
         
         // CombatManager 찾기
-        combatManager = FindObjectOfType<CombatManager>();
+        combatManager = FindAnyObjectByType<CombatManager>();
         
         documentsButton = GetComponent<Button>();
         
@@ -50,7 +50,7 @@ public class ApprovalDocuments : Item
         }
         
         // PlayerCharacter에도 장착
-        PlayerCharacter player = FindObjectOfType<PlayerCharacter>();
+        PlayerCharacter player = FindAnyObjectByType<PlayerCharacter>();
         if (player != null)
         {
             player.EquipItem(this);

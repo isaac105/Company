@@ -223,7 +223,10 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      assistant-manager-throw_0: -2646044919681645645
+      assistant-manager-throw_1: 6639620299422015423
+      assistant-manager-throw_2: -2322134262567417168
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

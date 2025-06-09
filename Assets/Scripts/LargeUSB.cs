@@ -16,7 +16,7 @@ public class LargeUSB : Item
         AddEffect(ItemEffectType.ReduceEnemyDefense, 0.3f, "방어력 30% 감소");
         
         // CombatManager 찾기
-        combatManager = FindObjectOfType<CombatManager>();
+        combatManager = FindAnyObjectByType<CombatManager>();
         
         usbButton = GetComponent<Button>();
         
@@ -39,8 +39,8 @@ public class LargeUSB : Item
         
         if (combatManager != null)
         {
-            // CombatManager에 아이템 선택 알림
-            combatManager.OnItemSelected(this);
+            // CombatManager에 아이템 선택 알림 (전투 시작)
+            combatManager.OnItemSelected(this, true);
             Debug.Log("CombatManager에 아이템 선택 전달: " + GetItemInfo());
         }
         else
@@ -49,7 +49,7 @@ public class LargeUSB : Item
         }
         
         // PlayerCharacter에도 장착
-        PlayerCharacter player = FindObjectOfType<PlayerCharacter>();
+        PlayerCharacter player = FindAnyObjectByType<PlayerCharacter>();
         if (player != null)
         {
             player.EquipItem(this);
