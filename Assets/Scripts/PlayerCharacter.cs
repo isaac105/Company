@@ -24,7 +24,8 @@ public class PlayerCharacter : MonoBehaviour
     [SerializeField] private string currentItemDebugInfo = "None";
 
     [Header("방어 시스템")]
-    private bool defenseSuccess = false;
+    [SerializeField] protected float baseDefenseChance = 0.3f; // 기본 30% 방어 확률
+    [SerializeField] protected bool defenseSuccess = false; // 방어 성공 여부
 
     public float HP
     {
@@ -84,12 +85,13 @@ public class PlayerCharacter : MonoBehaviour
         set { defenseCoefficient = value; } 
     }
     
-    public bool DefenseSuccess
-    {
+    public float BaseDefenseChance => baseDefenseChance;
+    public bool DefenseSuccess 
+    { 
         get { return defenseSuccess; }
         set { defenseSuccess = value; }
     }
-    
+
     void Start()
     {
         if (maxHp <= 0) maxHp = 100f;
@@ -119,17 +121,48 @@ public class PlayerCharacter : MonoBehaviour
         CheckHPState(); // Start에서 초기 HP 상태에 따라 이미지 업데이트
     }
     
-    public bool TryTakeDamage(float damage)
+    public virtual bool TryDefense()
     {
-        // 방어 성공 여부 확인
         if (defenseSuccess)
         {
-            Debug.Log("플레이어가 공격을 완전히 방어했습니다!");
+            Debug.Log("방어 성공!");
+            if (imageManager != null)
+            {
+                imageManager.ShowDodgeSprite();
+            }
+            return true;
+        }
+        
+        float roll = Random.Range(0f, 1f);
+        bool defended = roll < baseDefenseChance;
+        
+        if (defended)
+        {
+            if (imageManager != null)
+            {
+                imageManager.ShowDodgeSprite();
+            }
+            Debug.Log("방어 성공! (확률: " + (baseDefenseChance * 100).ToString("F1") + "%)");
+        }
+        else
+        {
+            Debug.Log("방어 실패 (확률: " + (baseDefenseChance * 100).ToString("F1") + "%)");
+        }
+        
+        return defended;
+    }
+
+    public virtual bool TryTakeDamage(float damage)
+    {
+        // 방어 시도
+        if (TryDefense())
+        {
+            Debug.Log("공격을 완전히 방어했습니다!");
             return false;
         }
         
-        float finalDamage = damage / defenseCoefficient;
-        HP -= finalDamage;
+        // 방어 실패 시 데미지 적용
+        HP -= damage;
         
         // 데미지를 받을 때 회피 모션 표시
         if (imageManager != null)
@@ -137,7 +170,7 @@ public class PlayerCharacter : MonoBehaviour
             imageManager.ShowDodgeSprite();
         }
         
-        Debug.Log("데미지 받음: " + finalDamage + " - 현재 HP: " + HP + "/" + maxHp);
+        Debug.Log("데미지 받음: " + damage + " - 현재 HP: " + HP + "/" + maxHp);
         
         if (HP <= 0)
         {

@@ -32,8 +32,8 @@ public class EnemyCharacter : MonoBehaviour
     [SerializeField] protected GameObject hpUIPrefab; // Inspector에서 할당할 HP UI 프리팹
     protected HpDisplay enemyHpDisplay; // HP 표시 스크립트 참조
 
-    public float HP
-    {
+    public float HP 
+    { 
         get { return hp; }
         set 
         { 
@@ -46,79 +46,17 @@ public class EnemyCharacter : MonoBehaviour
             }
         }
     }
+    public float Damage => damage;
+    public float MaxHP => maxHp;
+    public string EnemyName => enemyName;
+    public string EnemyRank => enemyRank;
+    public float BaseDefenseChance => baseDefenseChance;
+    public bool IsDefenseBlocked => isDefenseBlocked;
+    public bool LastActionWasDefense => lastActionWasDefense;
+    public Item CurrentItem => currentItem;
+    public float AttackCoefficient => attackCoefficient;
+    public float DefenseCoefficient => defenseCoefficient;
 
-    public float Damage
-    {
-        get { return damage; }
-        set { damage = value; }
-    }
-    
-    public float MaxHP 
-    { 
-        get { return maxHp; } 
-        set { maxHp = value; } 
-    }
-    
-    public string EnemyName
-    {
-        get { return enemyName; }
-        set { enemyName = value; }
-    }
-    
-    public string EnemyRank
-    {
-        get { return enemyRank; }
-        set { enemyRank = value; }
-    }
-    
-    public float BaseDefenseChance
-    {
-        get { return baseDefenseChance; }
-        set { baseDefenseChance = Mathf.Clamp01(value); }
-    }
-    
-    public bool IsDefenseBlocked
-    {
-        get { return isDefenseBlocked; }
-        set { isDefenseBlocked = value; }
-    }
-    
-    public bool LastActionWasDefense
-    {
-        get { return lastActionWasDefense; }
-    }
-    
-    public Item CurrentItem 
-    { 
-        get { return currentItem; } 
-        set { 
-            currentItem = value;
-            
-            if (currentItem != null)
-            {
-                currentItemDebugInfo = currentItem.gameObject.name + " (데미지: " + currentItem.DamageCoefficient + ")";
-            }
-            else
-            {
-                currentItemDebugInfo = "None";
-            }
-            
-            Debug.Log(enemyName + " CurrentItem 프로퍼티 설정됨: " + (value != null ? value.GetItemInfo() : "null"));
-        } 
-    }
-    
-    public float AttackCoefficient 
-    { 
-        get { return attackCoefficient; } 
-        set { attackCoefficient = value; } 
-    }
-    
-    public float DefenseCoefficient 
-    { 
-        get { return defenseCoefficient; } 
-        set { defenseCoefficient = value; } 
-    }
-    
     protected virtual void Start()
     {
         InitializeEnemy();
