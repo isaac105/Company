@@ -15,6 +15,11 @@ public class PlayerCharacter : MonoBehaviour
     [Header("이미지 관리")]
     [SerializeField] private CharacterImageManager imageManager;
 
+    // 새로운 필드 추가: HP UI 프리팹 참조
+    [Header("HP UI")]
+    [SerializeField] private GameObject hpUIPrefab; // Inspector에서 할당할 HP UI 프리팹
+    private HpDisplay playerHpDisplay; // HP 표시 스크립트 참조
+
     [Header("디버그 정보")]
     [SerializeField] private string currentItemDebugInfo = "None";
 
@@ -28,6 +33,11 @@ public class PlayerCharacter : MonoBehaviour
         { 
             hp = Mathf.Clamp(value, 0f, maxHp);
             CheckHPState();
+            // HP 변경 시 UI 업데이트
+            if (playerHpDisplay != null)
+            {
+                playerHpDisplay.UpdateHpImage(hp, maxHp);
+            }
         }
     }
 
@@ -91,8 +101,22 @@ public class PlayerCharacter : MonoBehaviour
         {
             imageManager = GetComponent<CharacterImageManager>();
         }
+
+        // HP UI 프리팹 인스턴스화 및 연결
+        if (hpUIPrefab != null)
+        {
+            GameObject hpUIInstance = Instantiate(hpUIPrefab, transform); // 플레이어의 자식으로 생성
+            playerHpDisplay = hpUIInstance.GetComponent<HpDisplay>();
+            if (playerHpDisplay != null)
+            {
+                // HP UI 위치 조정 (플레이어 캐릭터 위쪽으로) - 필요에 따라 유니티 에디터에서 조절
+                hpUIInstance.transform.localPosition = new Vector3(0, 220, 0); // 예시 위치
+                playerHpDisplay.UpdateHpImage(hp, maxHp); // 초기 HP 상태 반영
+            }
+        }
         
         Debug.Log("플레이어 캐릭터 초기화 완료: HP " + hp + "/" + maxHp);
+        CheckHPState(); // Start에서 초기 HP 상태에 따라 이미지 업데이트
     }
     
     public bool TryTakeDamage(float damage)
@@ -127,8 +151,8 @@ public class PlayerCharacter : MonoBehaviour
     {
         if (imageManager != null)
         {
-            // HP가 20% 이하일 때 화난 상태로 변경
-            imageManager.SetAngryState(HP <= maxHp * 0.2f);
+            // HP가 30% 이하일 때 화난 상태로 변경
+            imageManager.SetAngryState(HP <= maxHp * 0.3f);
         }
     }
     

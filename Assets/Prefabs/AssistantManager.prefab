@@ -61,8 +61,10 @@ MonoBehaviour:
   baseDefenseChance: 0.3
   isDefenseBlocked: 0
   defenseReduction: 0
+  imageManager: {fileID: 0}
   currentItemDebugInfo: None
   lastActionWasDefense: 0
+  hpUIPrefab: {fileID: 6752453840485122934, guid: 0024921f4ddcf42f090d7fdb2e175199, type: 3}
 --- !u!222 &3171982770278637228
 CanvasRenderer:
   m_ObjectHideFlags: 0

@@ -23,6 +23,7 @@ public class CombatManager : MonoBehaviour
     public Text enemyHpText;
     public Text stageText;
     public Text itemTitleText; // 아이템 제목 텍스트
+    public Text itemEffectDescriptionText; // 아이템 효과 설명 텍스트
     
     [Header("전투 이펙트")]
     public GameObject damageTextPrefab;  // 데미지 텍스트 프리팹
@@ -180,6 +181,14 @@ public class CombatManager : MonoBehaviour
         {
             itemTitleText.text = "현재 아이템: " + (item != null ? item.ItemName : "없음");
         }
+
+        // 아이템 효과 설명 업데이트
+        if (itemEffectDescriptionText != null)
+        {
+            itemEffectDescriptionText.text = item != null ? item.GetEffectsDescription() : "";
+            itemEffectDescriptionText.color = new Color(1.0f, 1.0f, 0.0f, 1.0f); // 노란 형광색 (RGB 255, 255, 0)
+        }
+
         Debug.Log("아이템 선택됨: " + (item != null ? item.GetItemInfo() : "None"));
         
         // startCombat이 true일 때만 전투 시작

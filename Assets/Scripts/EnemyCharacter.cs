@@ -28,6 +28,10 @@ public class EnemyCharacter : MonoBehaviour
     [SerializeField] private string currentItemDebugInfo = "None";
     [SerializeField] private bool lastActionWasDefense = false;
 
+    [Header("HP UI")]
+    [SerializeField] protected GameObject hpUIPrefab; // Inspector에서 할당할 HP UI 프리팹
+    protected HpDisplay enemyHpDisplay; // HP 표시 스크립트 참조
+
     public float HP
     {
         get { return hp; }
@@ -35,6 +39,11 @@ public class EnemyCharacter : MonoBehaviour
         { 
             hp = Mathf.Clamp(value, 0f, maxHp);
             CheckHPState();
+            // HP 변경 시 UI 업데이트
+            if (enemyHpDisplay != null)
+            {
+                enemyHpDisplay.UpdateHpImage(hp, maxHp);
+            }
         }
     }
 
@@ -126,6 +135,19 @@ public class EnemyCharacter : MonoBehaviour
         if (imageManager == null)
         {
             imageManager = GetComponent<CharacterImageManager>();
+        }
+
+        // HP UI 프리팹 인스턴스화 및 연결
+        if (hpUIPrefab != null)
+        {
+            GameObject hpUIInstance = Instantiate(hpUIPrefab, transform); // 적의 자식으로 생성
+            enemyHpDisplay = hpUIInstance.GetComponent<HpDisplay>();
+            if (enemyHpDisplay != null)
+            {
+                // HP UI 위치 조정 (적 캐릭터 위쪽으로)
+                hpUIInstance.transform.localPosition = new Vector3(0, 220, 0); // 예시 위치
+                enemyHpDisplay.UpdateHpImage(hp, maxHp); // 초기 HP 상태 반영
+            }
         }
         
         Debug.Log(enemyName + " (" + enemyRank + ") 초기화 완료: HP " + hp + "/" + maxHp + ", 방어 확률: " + (baseDefenseChance * 100) + "%");
@@ -283,8 +305,8 @@ public class EnemyCharacter : MonoBehaviour
     {
         if (imageManager != null)
         {
-            // HP가 20% 이하일 때 화난 상태로 변경
-            imageManager.SetAngryState(HP <= maxHp * 0.2f);
+            // HP가 30% 이하일 때 화난 상태로 변경
+            imageManager.SetAngryState(HP <= maxHp * 0.3f);
         }
     }
 

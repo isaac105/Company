@@ -13,7 +13,7 @@ public class HotCoffee : Item
         damageCoefficient = 1.0f;
 
         // 특수 효과 추가
-        AddEffect(ItemEffectType.ReduceEnemyDefense, 0.3f, "방어 확률 30% 감소");
+        AddEffect(ItemEffectType.BlockNextDefense, 0f, "적의 다음 방어 봉인");
 
         // CombatManager 찾기
         combatManager = FindAnyObjectByType<CombatManager>();
