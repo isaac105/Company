@@ -37,7 +37,7 @@ public class Item : MonoBehaviour
     // 아이템 정보 출력 (효과 포함)
     public virtual string GetItemInfo()
     {
-        string info = $"{itemName} - 데미지: x{damageCoefficient}";
+        string info = $"현재 아이템: {itemName} - 데미지: x{damageCoefficient}";
         
         if (effects.Count > 0)
         {
@@ -51,6 +51,26 @@ public class Item : MonoBehaviour
         }
         
         return info;
+    }
+    
+    // 아이템 효과 설명만 반환
+    public string GetEffectsDescription()
+    {
+        if (effects.Count == 0)
+        {
+            return "효과 없음";
+        }
+
+        string description = "";
+        for (int i = 0; i < effects.Count; i++)
+        {
+            description += ItemEffectProcessor.GetEffectDescription(effects[i].effectType, effects[i].effectValue);
+            if (i < effects.Count - 1)
+            {
+                description += ", ";
+            }
+        }
+        return description;
     }
     
     // 아이템 사용 기능

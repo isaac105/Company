@@ -66,16 +66,18 @@ public static class ItemEffectProcessor
     {
         switch (effectType)
         {
+            case ItemEffectType.None:
+                return "효과 없음";
             case ItemEffectType.BlockNextDefense:
-                return "방어 봉인";
+                return "적의 다음 방어를 봉인하여 무방비 상태로 만듭니다.";
             case ItemEffectType.DoubleAttack:
-                return ((int)effectValue) + "회 공격";
+                return ((int)effectValue == 2) ? "2회 연속 공격을 가합니다." : "적에게 " + ((int)effectValue) + "회의 연속 공격을 가합니다.";
             case ItemEffectType.ReduceEnemyDefense:
-                return "방어력 " + (effectValue * 100) + "% 감소";
+                return "1.2배의 데미지, 적의 방어 확률을 " + (effectValue * 100) + "% 감소시킵니다.";
             case ItemEffectType.HighDamage:
-                return "고데미지";
+                return "막대한 피해를 입히는 강력한 공격입니다.";
             default:
-                return "";
+                return "알 수 없는 효과.";
         }
     }
 }

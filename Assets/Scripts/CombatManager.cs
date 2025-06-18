@@ -23,6 +23,7 @@ public class CombatManager : MonoBehaviour
     public Text enemyHpText;
     public Text stageText;
     public Text itemTitleText; // 아이템 제목 텍스트
+    public Text itemEffectDescriptionText; // 아이템 효과 설명 텍스트
     
     [Header("전투 이펙트")]
     public GameObject damageTextPrefab;  // 데미지 텍스트 프리팹
@@ -180,6 +181,14 @@ public class CombatManager : MonoBehaviour
         {
             itemTitleText.text = "현재 아이템: " + (item != null ? item.ItemName : "없음");
         }
+
+        // 아이템 효과 설명 업데이트
+        if (itemEffectDescriptionText != null)
+        {
+            itemEffectDescriptionText.text = item != null ? item.GetEffectsDescription() : "";
+            itemEffectDescriptionText.color = new Color(1.0f, 1.0f, 0.0f, 1.0f); // 노란 형광색 (RGB 255, 255, 0)
+        }
+
         Debug.Log("아이템 선택됨: " + (item != null ? item.GetItemInfo() : "None"));
         
         // startCombat이 true일 때만 전투 시작
@@ -483,12 +492,38 @@ public class CombatManager : MonoBehaviour
             Debug.LogError("PlayerCharacter 또는 EnemyCharacter가 없습니다!");
             return;
         }
+
+        // 방어 타이밍 시스템의 결과를 먼저 처리
+        if (defenseTimingSystem != null)
+        {
+            defenseTimingSystem.CheckTiming();
+            // 방어 타이밍 시스템의 결과가 처리될 때까지 잠시 대기
+            StartCoroutine(WaitForDefenseResult());
+        }
+    }
+
+    IEnumerator WaitForDefenseResult()
+    {
+        // 방어 타이밍 시스템의 결과가 처리될 때까지 잠시 대기
+        yield return new WaitForSeconds(0.1f);
         
+        // 적의 공격 실행
+        ExecuteEnemyAttack();
+    }
+    
+    void ExecuteEnemyAttack()
+    {
+        if (playerCharacter == null || enemyCharacter == null)
+        {
+            Debug.LogError("PlayerCharacter 또는 EnemyCharacter가 없습니다!");
+            return;
+        }
+
         float enemyDamage = enemyCharacter.CalculateAttackDamage();
         bool wasDefended = false;
         
         // 방어 성공 여부 판정
-        if (defenseSuccess || (Random.Range(0f, 1f) < enemyCharacter.BaseDefenseChance + defenseBonus))
+        if (defenseSuccess || (Random.Range(0f, 1f) < playerCharacter.BaseDefenseChance + defenseBonus))
         {
             Debug.Log("방어 성공! 데미지 무효화!");
             enemyDamage = 0;
@@ -501,33 +536,149 @@ public class CombatManager : MonoBehaviour
             playerCharacter.DefenseSuccess = false;
         }
         
-        // 데미지 적용 및 텍스트 표시
-        if (!wasDefended)
+        // 플레이어가 선택한 아이템이 있다면 날라가기 효과 시작
+        if (selectedItem != null)
         {
-            playerCharacter.TryTakeDamage(enemyDamage);
-        }
-        ShowDamageText(enemyDamage, playerCharacter.transform.position, wasDefended);
-        Debug.Log(enemyCharacter.EnemyName + " 공격! " + (wasDefended ? "방어됨!" : "받은 데미지: " + enemyDamage));
-        
-        // 방어 결과 초기화
-        defenseSuccess = false;
-        defenseBonus = 0f;
-        
-        if (playerCharacter.HP <= 0)
-        {
-            Debug.Log("플레이어 사망! 패배!");
-            var gameEndManager = FindAnyObjectByType<GameEndManager>();
-            if (gameEndManager != null)
-            {
-                bgmManager.PlayBGM("Defeat");
-                gameEndManager.ShowGameOver();
-            }
-            SetState(State.ItemSelect);
+            StartCoroutine(FlyItemToPlayer(selectedItem.gameObject, () => {
+                // 데미지 적용 시도
+                if (!wasDefended)
+                {
+                    playerCharacter.TryTakeDamage(enemyDamage);
+                }
+                
+                // 데미지 또는 방어 텍스트 표시
+                ShowDamageText(enemyDamage, playerCharacter.transform.position, wasDefended);
+                Debug.Log("적 공격! " + (wasDefended ? "방어됨!" : "플레이어에게 데미지: " + enemyDamage));
+                
+                // 적 턴 종료
+                enemyCharacter.EndTurn();
+                
+                // 방어 결과 초기화
+                defenseSuccess = false;
+                defenseBonus = 0f;
+                
+                if (playerCharacter.HP <= 0)
+                {
+                    Debug.Log("플레이어 사망! 게임 오버!");
+                    var gameEndManager = FindAnyObjectByType<GameEndManager>();
+                    if (gameEndManager != null)
+                    {
+                        gameEndManager.ShowGameOver();
+                    }
+                }
+                else
+                {
+                    SetState(State.ItemSelect);
+                }
+            }));
         }
         else
         {
-            SetState(State.ItemSelect);
+            // 아이템이 없는 경우 바로 데미지 적용
+            if (!wasDefended)
+            {
+                playerCharacter.TryTakeDamage(enemyDamage);
+            }
+            
+            // 데미지 또는 방어 텍스트 표시
+            ShowDamageText(enemyDamage, playerCharacter.transform.position, wasDefended);
+            Debug.Log("적 공격! " + (wasDefended ? "방어됨!" : "플레이어에게 데미지: " + enemyDamage));
+            
+            // 적 턴 종료
+            enemyCharacter.EndTurn();
+            
+            // 방어 결과 초기화
+            defenseSuccess = false;
+            defenseBonus = 0f;
+            
+            if (playerCharacter.HP <= 0)
+            {
+                Debug.Log("플레이어 사망! 게임 오버!");
+                var gameEndManager = FindAnyObjectByType<GameEndManager>();
+                if (gameEndManager != null)
+                {
+                    gameEndManager.ShowGameOver();
+                }
+            }
+            else
+            {
+                SetState(State.ItemSelect);
+            }
         }
+    }
+
+    // 아이템이 적에서 플레이어로 날라가는 효과
+    IEnumerator FlyItemToPlayer(GameObject item, System.Action onComplete)
+    {
+        if (gameCanvas == null)
+        {
+            Debug.LogError("게임 캔버스가 설정되지 않았습니다!");
+            onComplete?.Invoke();
+            yield break;
+        }
+
+        // 아이템의 복사본 생성
+        GameObject flyingItem = Instantiate(item, gameCanvas.transform);
+        RectTransform flyingRect = flyingItem.GetComponent<RectTransform>();
+        
+        // 불필요한 컴포넌트 제거
+        Destroy(flyingItem.GetComponent<Button>());
+        Destroy(flyingItem.GetComponent<ItemLockState>());
+        
+        // 잠금 이미지 제거
+        Transform lockImage = flyingItem.transform.Find("LockImage");
+        if (lockImage != null)
+        {
+            Destroy(lockImage.gameObject);
+        }
+        
+        // 원본 아이템의 크기와 이미지 설정 복사
+        RectTransform originalRect = item.GetComponent<RectTransform>();
+        flyingRect.sizeDelta = originalRect.sizeDelta;
+        
+        Image flyingImage = flyingItem.GetComponent<Image>();
+        Image originalImage = item.GetComponent<Image>();
+        if (flyingImage && originalImage)
+        {
+            flyingImage.sprite = originalImage.sprite;
+            flyingImage.color = originalImage.color;
+        }
+
+        // 시작 위치 (적 캐릭터의 위치)
+        Vector2 startPos = enemyCharacter.transform.position;
+        flyingRect.position = startPos;
+
+        // 목표 위치 (플레이어 캐릭터의 위치)
+        Vector2 targetPos = playerCharacter.transform.position;
+
+        Debug.Log($"Flying item from enemy to player: {startPos} to {targetPos}");
+        
+        float elapsed = 0f;
+        Vector2 originalScale = flyingRect.localScale;
+        
+        while (elapsed < itemFlyDuration)
+        {
+            elapsed += Time.deltaTime;
+            float normalizedTime = elapsed / itemFlyDuration;
+            
+            // 포물선 운동 계산
+            Vector2 currentPos = Vector2.Lerp(startPos, targetPos, normalizedTime);
+            float height = Mathf.Sin(normalizedTime * Mathf.PI) * itemArcHeight;
+            currentPos.y += height;
+            
+            // 위치 업데이트
+            flyingRect.position = currentPos;
+            
+            // 크기 약간 줄이기
+            float scale = Mathf.Lerp(1f, 0.5f, normalizedTime);
+            flyingRect.localScale = originalScale * scale;
+            
+            yield return null;
+        }
+        
+        // 아이템 제거
+        Destroy(flyingItem);
+        onComplete?.Invoke();
     }
     
     void UpdateUI()

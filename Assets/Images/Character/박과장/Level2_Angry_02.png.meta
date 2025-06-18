@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Level2_Angry_02_0: 8964599992408189763
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

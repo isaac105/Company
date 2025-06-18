@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Level3_Dodge_01_0: -8656896027812970429
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
