@@ -51,6 +51,7 @@ public class CombatManager : MonoBehaviour
     public AudioClip sfxItemFly;
     public AudioClip sfxHit;
     public AudioClip sfxPlayerOh; // 플레이어 "오!" 효과음 추가
+    public AudioClip sfxTting;    // 방어 성공 효과음 추가
     private AudioSource sfxAudioSource;
     
     public enum State { ItemSelect, AttackTiming, EnemyAttack, DefenseTiming }
@@ -286,6 +287,7 @@ public class CombatManager : MonoBehaviour
                     SetState(State.DefenseTiming);
                 }
                 if (!wasDefended) PlayHitSFX();
+                if (wasDefended && sfxAudioSource != null && sfxTting != null) sfxAudioSource.PlayOneShot(sfxTting);
             }));
         }
     }
@@ -455,6 +457,9 @@ public class CombatManager : MonoBehaviour
             // 데미지 적용 시도
             bool wasDefended = !enemyCharacter.TryTakeDamage(currentDamage);
             
+            // 효과음 재생 (방어 성공/실패)
+            if (wasDefended && sfxAudioSource != null && sfxTting != null) sfxAudioSource.PlayOneShot(sfxTting);
+            if (!wasDefended) PlayHitSFX();
             // 데미지 또는 방어 텍스트 표시
             ShowDamageText(currentDamage, enemyCharacter.transform.position, wasDefended);
             Debug.Log($"연속 공격 {i + 1}번째! " + (wasDefended ? "방어됨!" : $"데미지: {currentDamage}"));
@@ -549,6 +554,7 @@ public class CombatManager : MonoBehaviour
                 ShowDamageText(enemyDamage, playerCharacter.transform.position, wasDefended);
                 Debug.Log("적 공격! " + (wasDefended ? "방어됨!" : "플레이어에게 데미지: " + enemyDamage));
                 if (!wasDefended) PlayHitSFX();
+                if (wasDefended && sfxAudioSource != null && sfxTting != null) sfxAudioSource.PlayOneShot(sfxTting);
                 // 적 턴 종료
                 enemyCharacter.EndTurn();
                 // 방어 결과 초기화
@@ -580,6 +586,7 @@ public class CombatManager : MonoBehaviour
             // 데미지 또는 방어 텍스트 표시
             ShowDamageText(enemyDamage, playerCharacter.transform.position, defenseSuccess);
             Debug.Log("적 공격! " + (defenseSuccess ? "방어됨!" : "플레이어에게 데미지: " + enemyDamage));
+            if (defenseSuccess && sfxAudioSource != null && sfxTting != null) sfxAudioSource.PlayOneShot(sfxTting);
             
             // 적 턴 종료
             enemyCharacter.EndTurn();
