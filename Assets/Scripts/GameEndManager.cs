@@ -187,4 +187,9 @@ public class GameEndManager : MonoBehaviour
             videoPlayer.loopPointReached -= OnVideoFinished;
         }
     }
+    
+    public bool IsGameEnded()
+    {
+        return isGameEnded;
+    }
 } 
