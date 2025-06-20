@@ -1429,10 +1429,10 @@ MonoBehaviour:
     volume: 0.35
   - stateName: Victory
     clip: {fileID: 8300000, guid: 9faa3a8acf7ec54449fd9f2c2dd8f76c, type: 3}
-    volume: 0.35
+    volume: 0.5
   - stateName: Defeat
     clip: {fileID: 8300000, guid: 697e070f642cbfe4db41b1469c49d381, type: 3}
-    volume: 0.35
+    volume: 0.5
   fadeSpeed: 1
   playOnAwake: 1
   currentState: Normal

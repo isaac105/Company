@@ -256,4 +256,19 @@ public class ItemSelectionManager : MonoBehaviour
             UpdateItemTitle(selectedItem);
         }
     }
+
+    // 마우스 클릭으로 아이템을 선택할 때 호출
+    public void SelectItemByMouse(Item item)
+    {
+        if (item == null || availableItems.Count == 0) return;
+        int idx = availableItems.IndexOf(item);
+        if (idx < 0) return;
+        // 이전 아이템 배경색 초기화
+        UpdateItemBackground(availableItems[currentItemIndex].gameObject, normalColor);
+        currentItemIndex = idx;
+        // 새 아이템 배경색 및 정보 갱신
+        UpdateItemBackground(item.gameObject, selectedColor);
+        UpdateItemTitle(item);
+        Debug.Log($"마우스 클릭으로 아이템 선택: {item.ItemName}");
+    }
 } 
