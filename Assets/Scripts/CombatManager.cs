@@ -694,13 +694,13 @@ public class CombatManager : MonoBehaviour
     void UpdateUI()
     {
         if (playerHpText && playerCharacter)
-            playerHpText.text = "Player HP: " + playerCharacter.HP.ToString("F0") + "/" + playerCharacter.MaxHP.ToString("F0");
+            playerHpText.text = "김사원 HP: \n" + playerCharacter.HP.ToString("F0") + "/" + playerCharacter.MaxHP.ToString("F0");
             
         if (enemyHpText && enemyCharacter)
-            enemyHpText.text = enemyCharacter.EnemyName + " HP: " + enemyCharacter.HP.ToString("F0") + "/" + enemyCharacter.MaxHP.ToString("F0");
+            enemyHpText.text = enemyCharacter.EnemyName + " HP: \n" + enemyCharacter.HP.ToString("F0") + "/" + enemyCharacter.MaxHP.ToString("F0");
             
         if (stageText && stageManager != null)
-            stageText.text = "스테이지: " + (stageManager.GetCurrentStage() + 1) + " | 상태: " + GetStateDisplayText() + " | 적: " + stageManager.GetCurrentEnemyRank();
+            stageText.text = "스테이지: " + (stageManager.GetCurrentStage() + 1) + "\n직급: " + stageManager.GetCurrentEnemyRank() + "\n현재 상태: " + GetStateDisplayText();
     }
     
     string GetStateDisplayText()
