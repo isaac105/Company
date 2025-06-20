@@ -62,13 +62,6 @@ public class StageManager : MonoBehaviour
         Debug.Log("StageManager Start");
         combatManager = FindFirstObjectByType<CombatManager>();
         
-        // 초기 BGM 설정
-        var bgmManager = FindFirstObjectByType<BGMManager>();
-        if (bgmManager != null)
-        {
-            bgmManager.PlayBGM("Normal");
-        }
-        
         // 배경 이미지 컴포넌트 찾기 (없으면 생성)
         if (backgroundImage == null)
         {

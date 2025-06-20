@@ -54,6 +54,12 @@ public class Stapler : Item
         {
             player.EquipItem(this);
         }
+        // ItemSelectionManager에도 선택 알림
+        var itemSelector = FindFirstObjectByType<ItemSelectionManager>();
+        if (itemSelector != null)
+        {
+            itemSelector.SelectItemByMouse(this);
+        }
     }
     
     public override void UseItem()

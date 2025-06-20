@@ -39,8 +39,8 @@ public class ApprovalDocuments : Item
         
         if (combatManager != null)
         {
-            // CombatManager에 아이템 선택 알림
-            combatManager.OnItemSelected(this);
+            // 전투 시작 플래그를 true로 전달
+            combatManager.OnItemSelected(this, true);
             Debug.Log("CombatManager에 아이템 선택 전달: " + GetItemInfo());
         }
         else
@@ -53,6 +53,12 @@ public class ApprovalDocuments : Item
         if (player != null)
         {
             player.EquipItem(this);
+        }
+        // ItemSelectionManager에도 선택 알림
+        var itemSelector = FindFirstObjectByType<ItemSelectionManager>();
+        if (itemSelector != null)
+        {
+            itemSelector.SelectItemByMouse(this);
         }
     }
     

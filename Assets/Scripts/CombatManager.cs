@@ -47,9 +47,17 @@ public class CombatManager : MonoBehaviour
     [Header("BGM 설정")]
     private BGMManager bgmManager;
     
+    [Header("효과음 설정")]
+    public AudioClip sfxItemFly;
+    public AudioClip sfxHit;
+    public AudioClip sfxPlayerOh; // 플레이어 "오!" 효과음 추가
+    private AudioSource sfxAudioSource;
+    
     public enum State { ItemSelect, AttackTiming, EnemyAttack, DefenseTiming }
     private State currentState;
     private Item selectedItem;
+    
+    private GameEndManager gameEndManager;
     
     void Start()
     {
@@ -70,10 +78,6 @@ public class CombatManager : MonoBehaviour
             
         // BGM 매니저 찾기
         bgmManager = FindFirstObjectByType<BGMManager>();
-        if (bgmManager != null)
-        {
-            bgmManager.PlayBGM("Normal");
-        }
             
         // 버튼 이벤트 등록
         if (attackButton != null)
@@ -106,6 +110,13 @@ public class CombatManager : MonoBehaviour
         {
             Debug.Log("현재 적: " + enemyCharacter.EnemyName + " (" + enemyCharacter.EnemyRank + ")");
         }
+        
+        gameEndManager = FindFirstObjectByType<GameEndManager>();
+        
+        // 효과음용 AudioSource 추가
+        sfxAudioSource = gameObject.AddComponent<AudioSource>();
+        sfxAudioSource.playOnAwake = false;
+        sfxAudioSource.loop = false;
     }
     
     public void SetEnemy(EnemyCharacter newEnemy)
@@ -116,6 +127,10 @@ public class CombatManager : MonoBehaviour
     
     void Update()
     {
+        // 게임 종료 시 모든 입력 무시
+        if (gameEndManager != null && gameEndManager.IsGameEnded())
+            return;
+        
         UpdateUI();
         
         if (Input.GetKeyDown(KeyCode.Space))
@@ -134,6 +149,10 @@ public class CombatManager : MonoBehaviour
     
     public void SetState(State newState)
     {
+        // 게임 종료 시 상태 변경 금지
+        if (gameEndManager != null && gameEndManager.IsGameEnded())
+            return;
+        
         currentState = newState;
         
         // BGM 상태 변경
@@ -143,10 +162,8 @@ public class CombatManager : MonoBehaviour
             {
                 case State.AttackTiming:
                 case State.DefenseTiming:
-                    bgmManager.PlayBGM("Battle");
-                    break;
                 case State.ItemSelect:
-                    bgmManager.PlayBGM("Normal");
+                    bgmManager.PlayBGM("Battle");
                     break;
             }
         }
@@ -232,62 +249,60 @@ public class CombatManager : MonoBehaviour
             }
             
             // 아이템 날라가기 효과 시작 (일반 공격)
-            StartCoroutine(FlyItemToEnemy(selectedItem.gameObject, () => {
+            StartCoroutine(FlyItemToEnemy(selectedItem.gameObject, playerDamage, (wasDefended) => {
                 // 다른 특수 효과 적용
                 selectedItem.ApplyItemEffects(playerCharacter, enemyCharacter, this);
-                
-                // 데미지 적용 시도
-                bool wasDefended = !enemyCharacter.TryTakeDamage(playerDamage);
-                
+                // 데미지 적용 시도는 코루틴에서 이미 처리됨
                 // 데미지 또는 방어 텍스트 표시
                 ShowDamageText(playerDamage, enemyCharacter.transform.position, wasDefended);
                 Debug.Log("플레이어 공격! " + (wasDefended ? "방어됨!" : enemyCharacter.EnemyName + "에게 데미지: " + playerDamage));
-                
                 // 플레이어 턴 종료 - 적의 일회성 효과 리셋
                 enemyCharacter.EndTurn();
-                
                 if (enemyCharacter.HP <= 0)
                 {
                     Debug.Log(enemyCharacter.EnemyName + " 사망! 승리!");
-                    
                     // CEO를 처치했는지 확인 (사장 랭크)
                     if (enemyCharacter.EnemyRank == "사장")
                     {
                         var gameEndManager = FindAnyObjectByType<GameEndManager>();
                         if (gameEndManager != null)
                         {
-                            bgmManager.PlayBGM("Victory");
                             gameEndManager.ShowGameClear();
                         }
+                        return; // 사장 처치 시 상태 전환 및 Normal BGM 호출 방지
                     }
                     else if (stageManager != null)
                     {
                         stageManager.OnEnemyDefeated();
                         if (bgmManager != null)
                         {
-                            bgmManager.PlayBGM("Normal");
+                            bgmManager.PlayBGM("Battle");
                         }
                     }
-                    
                     SetState(State.ItemSelect);
                 }
                 else
                 {
                     SetState(State.DefenseTiming);
                 }
+                if (!wasDefended) PlayHitSFX();
             }));
         }
     }
     
     // 아이템 날라가기 효과
-    IEnumerator FlyItemToEnemy(GameObject item, System.Action onComplete)
+    IEnumerator FlyItemToEnemy(GameObject item, float damage, System.Action<bool> onComplete)
     {
         if (gameCanvas == null)
         {
             Debug.LogError("게임 캔버스가 설정되지 않았습니다!");
-            onComplete?.Invoke();
+            onComplete?.Invoke(false);
             yield break;
         }
+
+        // 효과음 재생 (아이템 날아가기)
+        if (sfxAudioSource != null && sfxItemFly != null)
+            sfxAudioSource.PlayOneShot(sfxItemFly);
 
         // 아이템의 복사본 생성
         GameObject flyingItem = Instantiate(item, gameCanvas.transform);
@@ -350,7 +365,9 @@ public class CombatManager : MonoBehaviour
         
         // 효과 종료 및 정리
         Destroy(flyingItem);
-        onComplete?.Invoke();
+        // 데미지 적용 및 방어 여부 판단
+        bool wasDefended = !enemyCharacter.TryTakeDamage(damage);
+        onComplete?.Invoke(wasDefended);
     }
     
     // 데미지 텍스트 표시
@@ -433,7 +450,7 @@ public class CombatManager : MonoBehaviour
             }
             
             // 아이템 날라가기 효과 실행
-            yield return StartCoroutine(FlyItemToEnemy(selectedItem.gameObject, null));
+            yield return StartCoroutine(FlyItemToEnemy(selectedItem.gameObject, currentDamage, null));
             
             // 데미지 적용 시도
             bool wasDefended = !enemyCharacter.TryTakeDamage(currentDamage);
@@ -473,7 +490,7 @@ public class CombatManager : MonoBehaviour
                 stageManager.OnEnemyDefeated();
                 if (bgmManager != null)
                 {
-                    bgmManager.PlayBGM("Normal");
+                    bgmManager.PlayBGM("Battle");
                 }
             }
             
@@ -520,43 +537,23 @@ public class CombatManager : MonoBehaviour
         }
 
         float enemyDamage = enemyCharacter.CalculateAttackDamage();
-        bool wasDefended = false;
-        
-        // 방어 성공 여부 판정
-        if (defenseSuccess || (Random.Range(0f, 1f) < playerCharacter.BaseDefenseChance + defenseBonus))
-        {
-            Debug.Log("방어 성공! 데미지 무효화!");
-            enemyDamage = 0;
-            wasDefended = true;
-            playerCharacter.DefenseSuccess = true;
-        }
-        else
-        {
-            Debug.Log("방어 실패!");
-            playerCharacter.DefenseSuccess = false;
-        }
         
         // 플레이어가 선택한 아이템이 있다면 날라가기 효과 시작
         if (selectedItem != null)
         {
-            StartCoroutine(FlyItemToPlayer(selectedItem.gameObject, () => {
-                // 데미지 적용 시도
-                if (!wasDefended)
-                {
-                    playerCharacter.TryTakeDamage(enemyDamage);
-                }
-                
+            Debug.Log("[SFX] ExecuteEnemyAttack: 아이템 날아가기 효과음 재생 시도");
+            if (sfxAudioSource != null && sfxItemFly != null)
+                sfxAudioSource.PlayOneShot(sfxItemFly);
+            StartCoroutine(FlyItemToPlayer(selectedItem.gameObject, enemyDamage, (wasDefended) => {
                 // 데미지 또는 방어 텍스트 표시
                 ShowDamageText(enemyDamage, playerCharacter.transform.position, wasDefended);
                 Debug.Log("적 공격! " + (wasDefended ? "방어됨!" : "플레이어에게 데미지: " + enemyDamage));
-                
+                if (!wasDefended) PlayHitSFX();
                 // 적 턴 종료
                 enemyCharacter.EndTurn();
-                
                 // 방어 결과 초기화
                 defenseSuccess = false;
                 defenseBonus = 0f;
-                
                 if (playerCharacter.HP <= 0)
                 {
                     Debug.Log("플레이어 사망! 게임 오버!");
@@ -575,14 +572,14 @@ public class CombatManager : MonoBehaviour
         else
         {
             // 아이템이 없는 경우 바로 데미지 적용
-            if (!wasDefended)
+            if (!defenseSuccess)
             {
                 playerCharacter.TryTakeDamage(enemyDamage);
             }
             
             // 데미지 또는 방어 텍스트 표시
-            ShowDamageText(enemyDamage, playerCharacter.transform.position, wasDefended);
-            Debug.Log("적 공격! " + (wasDefended ? "방어됨!" : "플레이어에게 데미지: " + enemyDamage));
+            ShowDamageText(enemyDamage, playerCharacter.transform.position, defenseSuccess);
+            Debug.Log("적 공격! " + (defenseSuccess ? "방어됨!" : "플레이어에게 데미지: " + enemyDamage));
             
             // 적 턴 종료
             enemyCharacter.EndTurn();
@@ -608,14 +605,19 @@ public class CombatManager : MonoBehaviour
     }
 
     // 아이템이 적에서 플레이어로 날라가는 효과
-    IEnumerator FlyItemToPlayer(GameObject item, System.Action onComplete)
+    IEnumerator FlyItemToPlayer(GameObject item, float damage, System.Action<bool> onComplete)
     {
         if (gameCanvas == null)
         {
             Debug.LogError("게임 캔버스가 설정되지 않았습니다!");
-            onComplete?.Invoke();
+            onComplete?.Invoke(false);
             yield break;
         }
+
+        Debug.Log("[SFX] FlyItemToPlayer: 아이템 날아가기 효과음 재생 시도");
+        // 효과음 재생 (아이템 날아가기)
+        if (sfxAudioSource != null && sfxItemFly != null)
+            sfxAudioSource.PlayOneShot(sfxItemFly);
 
         // 아이템의 복사본 생성
         GameObject flyingItem = Instantiate(item, gameCanvas.transform);
@@ -678,19 +680,27 @@ public class CombatManager : MonoBehaviour
         
         // 아이템 제거
         Destroy(flyingItem);
-        onComplete?.Invoke();
+        // 데미지 적용 및 방어 여부 판단
+        bool wasDefended = !playerCharacter.TryTakeDamage(damage);
+        onComplete?.Invoke(wasDefended);
+        // 맞는 소리 및 "오!" 효과음 재생
+        if (!wasDefended) {
+            PlayHitSFX();
+            if (sfxAudioSource != null && sfxPlayerOh != null)
+                sfxAudioSource.PlayOneShot(sfxPlayerOh);
+        }
     }
     
     void UpdateUI()
     {
         if (playerHpText && playerCharacter)
-            playerHpText.text = "Player HP: " + playerCharacter.HP.ToString("F0") + "/" + playerCharacter.MaxHP.ToString("F0");
+            playerHpText.text = "김사원 HP: \n" + playerCharacter.HP.ToString("F0") + "/" + playerCharacter.MaxHP.ToString("F0");
             
         if (enemyHpText && enemyCharacter)
-            enemyHpText.text = enemyCharacter.EnemyName + " HP: " + enemyCharacter.HP.ToString("F0") + "/" + enemyCharacter.MaxHP.ToString("F0");
+            enemyHpText.text = enemyCharacter.EnemyName + " HP: \n" + enemyCharacter.HP.ToString("F0") + "/" + enemyCharacter.MaxHP.ToString("F0");
             
         if (stageText && stageManager != null)
-            stageText.text = "스테이지: " + (stageManager.GetCurrentStage() + 1) + " | 상태: " + GetStateDisplayText() + " | 적: " + stageManager.GetCurrentEnemyRank();
+            stageText.text = "스테이지: " + (stageManager.GetCurrentStage() + 1) + "\n직급: " + stageManager.GetCurrentEnemyRank() + "\n현재 상태: " + GetStateDisplayText();
     }
     
     string GetStateDisplayText()
@@ -708,6 +718,9 @@ public class CombatManager : MonoBehaviour
     // ResetCombat 메서드를 public으로 변경
     public void ResetCombat()
     {
+        if (gameEndManager != null && gameEndManager.IsGameEnded())
+            return;
+        
         if (playerCharacter != null)
         {
             playerCharacter.HP = playerCharacter.MaxHP;
@@ -726,6 +739,8 @@ public class CombatManager : MonoBehaviour
     // 공격 버튼 클릭 이벤트
     public void OnAttackButtonClick()
     {
+        if (gameEndManager != null && gameEndManager.IsGameEnded())
+            return;
         if (currentState == State.AttackTiming)
         {
             Debug.Log("공격 버튼 클릭!");
@@ -740,6 +755,8 @@ public class CombatManager : MonoBehaviour
     // 방어 버튼 클릭 이벤트
     public void OnDefenseButtonClick()
     {
+        if (gameEndManager != null && gameEndManager.IsGameEnded())
+            return;
         if (currentState == State.DefenseTiming)
         {
             Debug.Log("방어 버튼 클릭!");
@@ -762,5 +779,12 @@ public class CombatManager : MonoBehaviour
         {
             defenseButton.onClick.RemoveListener(OnDefenseButtonClick);
         }
+    }
+    
+    // 적이 데미지를 받을 때 효과음 재생
+    void PlayHitSFX()
+    {
+        if (sfxAudioSource != null && sfxHit != null)
+            sfxAudioSource.PlayOneShot(sfxHit);
     }
 }
