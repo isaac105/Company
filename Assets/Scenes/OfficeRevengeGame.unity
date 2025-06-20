@@ -1146,6 +1146,8 @@ MonoBehaviour:
   imageManager: {fileID: 0}
   hpUIPrefab: {fileID: 6752453840485122934, guid: 2ef0ba11a237c473baedc933538fbeee, type: 3}
   currentItemDebugInfo: None
+  baseDefenseChance: 0.3
+  defenseSuccess: 0
 --- !u!65 &574634054
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1499,6 +1501,8 @@ MonoBehaviour:
   attackTimingSystem: {fileID: 1252905765}
   defenseTimingSystem: {fileID: 525473690}
   stageManager: {fileID: 1673489258}
+  sfxItemFly: {fileID: 8300000, guid: 3767a0f0adb26482492bfa9b1a8a07bf, type: 3}
+  sfxHit: {fileID: 8300000, guid: 60658fd69a65f4baf98ec2815c2798bf, type: 3}
 --- !u!4 &663841662
 Transform:
   m_ObjectHideFlags: 0

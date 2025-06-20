@@ -56,7 +56,12 @@ public class BGMManager : MonoBehaviour
     
     public void PlayBGM(string stateName)
     {
-        if (currentState == stateName) return;
+        Debug.Log($"[BGMManager] PlayBGM 호출: {stateName}");
+        if (currentState == stateName)
+        {
+            Debug.Log($"[BGMManager] 이미 {stateName} 상태입니다. 재생 생략");
+            return;
+        }
         
         BGMData bgmData = System.Array.Find(bgmList, x => x.stateName == stateName);
         if (bgmData != null)
@@ -64,11 +69,17 @@ public class BGMManager : MonoBehaviour
             currentState = stateName;
             audioSource.clip = bgmData.clip;
             targetVolume = bgmData.volume;
+            Debug.Log($"[BGMManager] {stateName} BGMData 찾음, Clip: {audioSource.clip?.name}, Volume: {targetVolume}");
             
             if (!audioSource.isPlaying)
             {
                 audioSource.Play();
+                Debug.Log("[BGMManager] AudioSource.Play() 호출");
             }
+        }
+        else
+        {
+            Debug.LogWarning($"[BGMManager] {stateName} BGMData를 찾을 수 없음");
         }
     }
     
