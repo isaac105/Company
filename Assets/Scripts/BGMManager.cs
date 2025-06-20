@@ -17,7 +17,7 @@ public class BGMManager : MonoBehaviour
     public bool playOnAwake = true;
     
     [Header("현재 상태")]
-    public string currentState = "Normal";
+    public string currentState = "";
     
     private AudioSource audioSource;
     private float targetVolume;

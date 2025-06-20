@@ -1422,7 +1422,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bgmList:
   - stateName: Normal
-    clip: {fileID: 8300000, guid: 033766cc31c97904bae4404b8a079544, type: 3}
+    clip: {fileID: 8300000, guid: c47a4c707dcfd0b45b090a81c737f4ff, type: 3}
     volume: 0.35
   - stateName: Battle
     clip: {fileID: 8300000, guid: 033766cc31c97904bae4404b8a079544, type: 3}

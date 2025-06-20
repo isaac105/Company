@@ -78,10 +78,6 @@ public class CombatManager : MonoBehaviour
             
         // BGM 매니저 찾기
         bgmManager = FindFirstObjectByType<BGMManager>();
-        if (bgmManager != null)
-        {
-            bgmManager.PlayBGM("Normal");
-        }
             
         // 버튼 이벤트 등록
         if (attackButton != null)
@@ -166,10 +162,8 @@ public class CombatManager : MonoBehaviour
             {
                 case State.AttackTiming:
                 case State.DefenseTiming:
-                    bgmManager.PlayBGM("Battle");
-                    break;
                 case State.ItemSelect:
-                    bgmManager.PlayBGM("Normal");
+                    bgmManager.PlayBGM("Battle");
                     break;
             }
         }
@@ -273,7 +267,6 @@ public class CombatManager : MonoBehaviour
                         var gameEndManager = FindAnyObjectByType<GameEndManager>();
                         if (gameEndManager != null)
                         {
-                            bgmManager.PlayBGM("Victory");
                             gameEndManager.ShowGameClear();
                         }
                         return; // 사장 처치 시 상태 전환 및 Normal BGM 호출 방지
@@ -283,7 +276,7 @@ public class CombatManager : MonoBehaviour
                         stageManager.OnEnemyDefeated();
                         if (bgmManager != null)
                         {
-                            bgmManager.PlayBGM("Normal");
+                            bgmManager.PlayBGM("Battle");
                         }
                     }
                     SetState(State.ItemSelect);
@@ -497,7 +490,7 @@ public class CombatManager : MonoBehaviour
                 stageManager.OnEnemyDefeated();
                 if (bgmManager != null)
                 {
-                    bgmManager.PlayBGM("Normal");
+                    bgmManager.PlayBGM("Battle");
                 }
             }
             
