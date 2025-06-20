@@ -1423,16 +1423,16 @@ MonoBehaviour:
   bgmList:
   - stateName: Normal
     clip: {fileID: 8300000, guid: 033766cc31c97904bae4404b8a079544, type: 3}
-    volume: 0.2
+    volume: 0.35
   - stateName: Battle
     clip: {fileID: 8300000, guid: 033766cc31c97904bae4404b8a079544, type: 3}
-    volume: 0.2
+    volume: 0.35
   - stateName: Victory
     clip: {fileID: 8300000, guid: 9faa3a8acf7ec54449fd9f2c2dd8f76c, type: 3}
-    volume: 0.2
+    volume: 0.35
   - stateName: Defeat
     clip: {fileID: 8300000, guid: 697e070f642cbfe4db41b1469c49d381, type: 3}
-    volume: 0.2
+    volume: 0.35
   fadeSpeed: 1
   playOnAwake: 1
   currentState: Normal
@@ -1503,6 +1503,7 @@ MonoBehaviour:
   stageManager: {fileID: 1673489258}
   sfxItemFly: {fileID: 8300000, guid: 3767a0f0adb26482492bfa9b1a8a07bf, type: 3}
   sfxHit: {fileID: 8300000, guid: 60658fd69a65f4baf98ec2815c2798bf, type: 3}
+  sfxPlayerOh: {fileID: 8300000, guid: a09ad407bde3e46a1bef776f7b26d02f, type: 3}
 --- !u!4 &663841662
 Transform:
   m_ObjectHideFlags: 0
