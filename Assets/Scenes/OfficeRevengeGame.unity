@@ -1504,6 +1504,7 @@ MonoBehaviour:
   sfxItemFly: {fileID: 8300000, guid: 3767a0f0adb26482492bfa9b1a8a07bf, type: 3}
   sfxHit: {fileID: 8300000, guid: 60658fd69a65f4baf98ec2815c2798bf, type: 3}
   sfxPlayerOh: {fileID: 8300000, guid: a09ad407bde3e46a1bef776f7b26d02f, type: 3}
+  sfxTting: {fileID: 8300000, guid: 41f98adb7b0804ecca03f5c73eed2690, type: 3}
 --- !u!4 &663841662
 Transform:
   m_ObjectHideFlags: 0
