@@ -701,7 +701,7 @@ public class CombatManager : MonoBehaviour
     void UpdateUI()
     {
         if (playerHpText && playerCharacter)
-            playerHpText.text = "김사원 HP: \n" + playerCharacter.HP.ToString("F0") + "/" + playerCharacter.MaxHP.ToString("F0");
+            playerHpText.text = "플레이어 HP: \n" + playerCharacter.HP.ToString("F0") + "/" + playerCharacter.MaxHP.ToString("F0");
             
         if (enemyHpText && enemyCharacter)
             enemyHpText.text = enemyCharacter.EnemyName + " HP: \n" + enemyCharacter.HP.ToString("F0") + "/" + enemyCharacter.MaxHP.ToString("F0");
